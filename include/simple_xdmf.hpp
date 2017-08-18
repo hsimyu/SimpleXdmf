@@ -1,6 +1,7 @@
 #ifndef SIMPLE_XDMF_HPP_INCLUDED
 #define SIMPLE_XDMF_HPP_INCLUDED
 
+#include <array>
 #include <string>
 #include <fstream>
 
@@ -39,6 +40,44 @@ class SimpleXdmf {
 
         void endElement() {
             backIndent();
+        }
+
+        // for checking valid types
+        static constexpr int dataItemTypeLength = 6;
+        static constexpr int gridTypeLength = 4;
+        static constexpr int topologyTypeLength = 6;
+        static constexpr int geometryTypeLength = 6;
+        static constexpr int attributeTypeLength = 5;
+        static constexpr int attributeCenterLength = 5;
+        static constexpr int setTypeLength = 4;
+        static constexpr int timeTypeLength = 4;
+        static constexpr int formatTypeLength = 3;
+        static constexpr int numberTypeLength = 5;
+        static constexpr int precisionTypeLength = 4;
+
+        std::array<std::string, dataItemTypeLength> DataItemType {"Uniform", "Collection", "Tree", "HyperSlab", "Coordinates", "Function"};
+        std::array<std::string, gridTypeLength> GridType {"Uniform", "Collection", "Tree", "Subset"};
+        std::array<std::string, topologyTypeLength> TopologyType {"2DSMesh", "2DRectMesh", "2DCoRectMesh", "3DSMesh", "3DRectMesh", "3DCoRectMesh"};
+        std::array<std::string, geometryTypeLength> GeometryType {"XYZ", "XY", "X_Y_Z", "VXVYVZ", "ORIGIN_DXDYDZ", "ORIGIN_DXDY"};
+        std::array<std::string, attributeTypeLength> AttributeType {"Scalar", "Vector", "Tensor", "Tensor6", "Matrix"};
+        std::array<std::string, attributeCenterLength> AttributeCenter {"Node", "Edge", "Face", "Cell", "Grid"};
+        std::array<std::string, setTypeLength> SetType {"Node", "Edge", "Face", "Cell"};
+        std::array<std::string, timeTypeLength> TimeType {"Single", "HyperSlab", "List", "Range"};
+        std::array<std::string, formatTypeLength> FormatType {"XML", "HDF", "Binary"};
+        std::array<std::string, numberTypeLength> NumberType {"Float", "Int", "UInt", "Char", "UChar"};
+        std::array<std::string, precisionTypeLength> PrecisionType {"1", "2", "4", "8"};
+
+        template<int N>
+        bool checkIsValidType(const std::array<std::string, N>& valid_types, const std::string& specified_type) {
+            bool is_valid = false;
+
+            for(const auto& t : valid_types) {
+                if (t == specified_type) {
+                    is_valid = true;
+                }
+            }
+
+            return is_valid;
         }
 
     public:
@@ -85,12 +124,6 @@ class SimpleXdmf {
             endEdit = true;
         }
 
-        enum class DataItemType {Uniform};
-        enum class TopologyType {_2DSMesh, _2DRectMesh, _2DCoRectMesh, _3DSMesh, _3DRectMesh, _3DCoRectMesh};
-        enum class GeometryType {Uniform};
-        enum class AttributeType {Scalar, Vector};
-        enum class AttributeCenter {Node};
-
         void beginDomain() {
             beginElement();
             content += "<Domain>" + newLine;
@@ -102,33 +135,32 @@ class SimpleXdmf {
             endElement();
         };
 
-        void beginTopology(TopologyType type = TopologyType::_2DCoRectMesh) {
+        void beginGrid(const std::string& type = "Uniform") {
             beginElement();
 
-            using TType = TopologyType;
-            std::string typeString;
-
-            switch(type) {
-                case TType::_2DSMesh:
-                    typeString = "2DSMesh";
-                case TType::_2DRectMesh:
-                    typeString = "2DRectMesh";
-                    break;
-                case TType::_2DCoRectMesh:
-                    typeString = "2DCoRectMesh";
-                    break;
-                case TType::_3DSMesh:
-                    typeString = "3DSMesh";
-                    break;
-                case TType::_3DRectMesh:
-                    typeString = "3DRectMesh";
-                    break;
-                case TType::_3DCoRectMesh:
-                    typeString = "3DCoRectMesh";
-                    break;
+            if (checkIsValidType<gridTypeLength>(GridType, type)) {
+                content += "<Grid GridType=\"" + type + "\">" + newLine;
+            } else {
+                std::string error_message = "Invalid Grid type = " + type + " is passed to beginGrid().";
+                throw std::invalid_argument(error_message);
             }
+        }
 
-            content += "<Topology TopologyType=\"" + typeString + "\">" + newLine;
+        void endGrid() {
+            insertIndent();
+            content += "</Grid>" + newLine;
+            endElement();
+        }
+
+        void beginTopology(const std::string& type = "2DCoRectMesh") {
+            beginElement();
+
+            if (checkIsValidType<topologyTypeLength>(TopologyType, type)) {
+                content += "<Topology TopologyType=\"" + type + "\">" + newLine;
+            } else {
+                std::string error_message = "Invalid Topology type = " + type + " is passed to beginTopology().";
+                throw std::invalid_argument(error_message);
+            }
         }
 
         void endTopology() {
@@ -137,20 +169,34 @@ class SimpleXdmf {
             endElement();
         }
 
-        void beginGeometory(GeometryType type = GeometryType::Uniform){
+        void beginGeometory(const std::string& type = "XYZ"){
             beginElement();
-            content += "<Geometry GeometryType=\"2DRectMesh\">" + newLine;
+
+            if (checkIsValidType<geometryTypeLength>(GeometryType, type)) {
+                content += "<Geometry GeometryType=\"" + type + "\">" + newLine;
+            } else {
+                std::string error_message = "Invalid Geometry type = " + type + " is passed to beginGeometry().";
+                throw std::invalid_argument(error_message);
+            }
         }
+
         void endGeometory(){
             insertIndent();
             content += "</Geometry>" + newLine;
             endElement();
         }
 
-        void beginDataItem(DataItemType type = DataItemType::Uniform) {
+        void beginDataItem(const std::string& type = "Uniform") {
             beginElement();
-            content += "<DataItem ItemType=\"Uniform\">" + newLine;
+
+            if (checkIsValidType<dataItemTypeLength>(DataItemType, type)) {
+                content += "<DataItem ItemType=\"" + type + "\">" + newLine;
+            } else {
+                std::string error_message = "Invalid DataItem type = " + type + " is passed to beginDataItem().";
+                throw std::invalid_argument(error_message);
+            }
         }
+
         void endDataItem() {
             insertIndent();
             content += "</DataItem>" + newLine;

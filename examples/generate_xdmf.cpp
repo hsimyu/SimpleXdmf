@@ -4,8 +4,12 @@ int main() {
     SimpleXdmf gen;
 
     gen.beginDomain();
-        gen.beginTopology(SimpleXdmf::TopologyType::_2DCoRectMesh);
-            gen.beginDataItem();
+        gen.beginTopology("3DCoRectMesh");
+            gen.beginDataItem("Uniform");
+            gen.endDataItem();
+            gen.beginDataItem("Collection");
+            gen.endDataItem();
+            gen.beginDataItem("Tree");
             gen.endDataItem();
         gen.endTopology();
         gen.beginGeometory();
