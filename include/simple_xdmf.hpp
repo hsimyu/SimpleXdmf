@@ -17,6 +17,10 @@ class SimpleXdmf {
         std::string newLine;
         std::string indent;
 
+        // store current processing tag information for type validation
+        enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain};
+        TAG current_tag;
+
         unsigned int currentIndentation = 0;
         bool endEdit = false;
 
@@ -34,22 +38,49 @@ class SimpleXdmf {
             }
         }
 
+        void setCurrentTag(const std::string& tag) {
+            if (tag == "Grid") {
+                current_tag = TAG::Grid;
+            } else if (tag == "DataItem") {
+                current_tag = TAG::DataItem;
+            } else if (tag == "Topology") {
+                current_tag = TAG::Topology;
+            } else if (tag == "Geometry") {
+                current_tag = TAG::Geometry;
+            } else if (tag == "Attribute") {
+                current_tag = TAG::Attribute;
+            } else if (tag == "Set") {
+                current_tag = TAG::Set;
+            } else if (tag == "Time") {
+                current_tag = TAG::Time;
+            } else if (tag == "Domain") {
+                current_tag = TAG::Domain;
+            } else if (tag == "Information") {
+                current_tag = TAG::Information;
+            }
+        }
+
         void beginElement(const std::string& tag) {
             if (buffer != "") {
                 commitBuffer();
             }
+
             addIndent();
             insertIndent();
             buffer += "<" + tag;
+
+            setCurrentTag(tag);
         }
 
         void endElement(const std::string& tag) {
             if (buffer != "") {
                 commitBuffer();
             }
+
             insertIndent();
             buffer += "</" + tag;
             commitBuffer();
+
             backIndent();
         }
 
@@ -58,7 +89,6 @@ class SimpleXdmf {
             buffer.clear();
         }
 
-        // for checking valid types
         static constexpr int dataItemTypeLength = 6;
         static constexpr int gridTypeLength = 4;
         static constexpr int topologyTypeLength = 6;
@@ -96,25 +126,97 @@ class SimpleXdmf {
             return is_valid;
         }
 
+        bool checkType(const std::string& type) {
+            bool isValid = false;
+            switch (current_tag) {
+                case TAG::Grid:
+                    isValid = checkIsValidType<gridTypeLength>(GridType, type);
+                    break;
+                case TAG::DataItem:
+                    isValid = checkIsValidType<dataItemTypeLength>(DataItemType, type);
+                    break;
+                case TAG::Topology:
+                    isValid = checkIsValidType<topologyTypeLength>(TopologyType, type);
+                    break;
+                case TAG::Geometry:
+                    isValid = checkIsValidType<geometryTypeLength>(GeometryType, type);
+                    break;
+                case TAG::Attribute:
+                    isValid = checkIsValidType<attributeTypeLength>(AttributeType, type);
+                    break;
+                case TAG::Set:
+                    isValid = checkIsValidType<setTypeLength>(SetType, type);
+                    break;
+                case TAG::Time:
+                    isValid = checkIsValidType<timeTypeLength>(TimeType, type);
+                    break;
+                case TAG::Information:
+                    isValid = true;
+                    break;
+                case TAG::Domain:
+                    isValid = true;
+                    break;
+                default:
+                    break;
+            }
+
+            if (!isValid) {
+                std::string tagString = getTagString();
+
+                std::string error_message = "Invalid " + tagString + " type = " + type + " is passed to.";
+                throw std::invalid_argument(error_message);
+            }
+
+            return isValid;
+        }
+
+        std::string getTagString() {
+            switch (current_tag) {
+                case TAG::Grid:
+                    return "Grid";
+                case TAG::DataItem:
+                    return "DataItem";
+                case TAG::Topology:
+                    return "Topology";
+                case TAG::Geometry:
+                    return "Geometry";
+                case TAG::Attribute:
+                    return "Attribute";
+                case TAG::Set:
+                    return "Set";
+                case TAG::Time:
+                    return "Time";
+                case TAG::Information:
+                    return "Information";
+                case TAG::Domain:
+                    return "Domain";
+                default:
+                    return "";
+            }
+        }
+
         // Adding Valid Attributes
-        void addType(const std::string& prefix, const std::string& type) {
-            buffer += " " + prefix + "Type=\"" + type + "\"";
+        void addType(const std::string& type) {
+            if (checkType(type)) {
+                buffer += " " + getTagString() + "Type=\"" + type + "\"";
+            }
         }
 
     public:
         SimpleXdmf(const std::string& _version = "3.0") {
             version = _version;
             setNewLineCode();
-            setIndent();
+            setIndentSpaceSize();
             beginXdmf();
         }
 
-        void setIndent(const int size = 4) {
+        void setIndentSpaceSize(const int size = 4) {
             if (size == 0) {
                 indent = '\t';
                 return;
             }
 
+            indent.clear();
             for (int i = 0; i < size; ++i) {
                 indent += ' ';
             }
@@ -155,13 +257,7 @@ class SimpleXdmf {
 
         void beginGrid(const std::string& type = "Uniform") {
             beginElement("Grid");
-
-            if (checkIsValidType<gridTypeLength>(GridType, type)) {
-                addType("Grid", type);
-            } else {
-                std::string error_message = "Invalid Grid type = " + type + " is passed to beginGrid().";
-                throw std::invalid_argument(error_message);
-            }
+            addType(type);
         }
 
         void endGrid() {
@@ -170,13 +266,7 @@ class SimpleXdmf {
 
         void beginTopology(const std::string& type = "2DCoRectMesh") {
             beginElement("Topology");
-
-            if (checkIsValidType<topologyTypeLength>(TopologyType, type)) {
-                addType("Topology", type);
-            } else {
-                std::string error_message = "Invalid Topology type = " + type + " is passed to beginTopology().";
-                throw std::invalid_argument(error_message);
-            }
+            addType(type);
         }
 
         void endTopology() {
@@ -185,13 +275,7 @@ class SimpleXdmf {
 
         void beginGeometory(const std::string& type = "XYZ"){
             beginElement("Geometry");
-
-            if (checkIsValidType<geometryTypeLength>(GeometryType, type)) {
-                addType("Geometry", type);
-            } else {
-                std::string error_message = "Invalid Geometry type = " + type + " is passed to beginGeometry().";
-                throw std::invalid_argument(error_message);
-            }
+            addType(type);
         }
 
         void endGeometory(){
@@ -200,13 +284,7 @@ class SimpleXdmf {
 
         void beginDataItem(const std::string& type = "Uniform") {
             beginElement("DataItem");
-
-            if (checkIsValidType<dataItemTypeLength>(DataItemType, type)) {
-                addType("DataItem", type);
-            } else {
-                std::string error_message = "Invalid DataItem type = " + type + " is passed to beginDataItem().";
-                throw std::invalid_argument(error_message);
-            }
+            addType(type);
         }
 
         void endDataItem() {
