@@ -18,7 +18,7 @@ class SimpleXdmf {
         std::string indent;
 
         // store current processing tag information for type validation
-        enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain};
+        enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain, Inner};
         TAG current_tag;
 
         unsigned int currentIndentation = 0;
@@ -57,6 +57,8 @@ class SimpleXdmf {
                 current_tag = TAG::Domain;
             } else if (tag == "Information") {
                 current_tag = TAG::Information;
+            } else if (tag == "Inner") {
+                current_tag = TAG::Inner;
             }
         }
 
@@ -86,6 +88,28 @@ class SimpleXdmf {
 
         void commitBuffer() {
             content += buffer + ">" + newLine;
+            buffer.clear();
+        }
+
+        void beginInnerElement() {
+            if (buffer != "") {
+                commitBuffer();
+            }
+            addIndent();
+            insertIndent();
+
+            setCurrentTag("Inner");
+        }
+
+        void endInnerElement() {
+            if (buffer != "") {
+                commitInnerBuffer();
+            }
+            backIndent();
+        }
+
+        void commitInnerBuffer() {
+            content += buffer + newLine;
             buffer.clear();
         }
 
@@ -190,6 +214,8 @@ class SimpleXdmf {
                     return "Information";
                 case TAG::Domain:
                     return "Domain";
+                case TAG::Inner:
+                    return "Inner";
                 default:
                     return "";
             }
@@ -289,6 +315,12 @@ class SimpleXdmf {
 
         void endDataItem() {
             endElement("DataItem");
+        }
+
+        void addItem() {
+            beginInnerElement();
+            buffer += "1 2 3";
+            endInnerElement();
         }
 
         void setName(const std::string& name) {
