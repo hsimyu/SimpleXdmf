@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <array>
+#include <vector>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -18,6 +19,7 @@ class SimpleXdmf {
         std::string version;
         std::string newLine;
         std::string indent;
+        unsigned int innerElementPerLine = 10;
 
         // store current processing tag information for type validation
         enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain, Inner};
@@ -111,7 +113,7 @@ class SimpleXdmf {
         }
 
         void commitInnerBuffer() {
-            content += buffer + newLine;
+            content += buffer;
             buffer.clear();
         }
 
@@ -230,6 +232,27 @@ class SimpleXdmf {
             }
         }
 
+        // for convinience
+        void convertFromVariadicArgsToStringInternal(const std::stringstream& ss) {}
+
+        template<typename First, typename... Rests>
+        void convertFromVariadicArgsToStringInternal(std::stringstream& ss, First&& first, Rests&&... rest) {
+            ss << first;
+
+            constexpr std::size_t parameter_pack_size = sizeof...(Rests);
+            if (parameter_pack_size > 0) {
+                ss << " ";
+                convertFromVariadicArgsToStringInternal(ss, std::forward<Rests>(rest)...);
+            }
+        }
+
+        template<typename... Args>
+        std::string convertFromVariadicArgsToString(Args&&... args) {
+            std::stringstream ss;
+            convertFromVariadicArgsToStringInternal(ss, std::forward<Args>(args)...);
+            return ss.str();
+        }
+
     public:
         SimpleXdmf(const std::string& _version = "3.0") {
             version = _version;
@@ -328,12 +351,35 @@ class SimpleXdmf {
             endElement("DataItem");
         }
 
-        void addItem() {
+        template<typename T>
+        void addItem(const std::vector<T>& values) {
             beginInnerElement();
-            buffer += "1 2 3";
+
+            std::stringstream ss;
+            auto size = values.size();
+            for(size_t i = 1; i <= size; ++i) {
+                ss << values[i - 1];
+
+                if (i < size) {
+                    ss << " ";
+
+                    if (i % innerElementPerLine == 0) {
+                        buffer += ss.str() + newLine;
+                        insertIndent();
+                        ss.str("");
+                        ss.clear(std::stringstream::goodbit);
+                    }
+                }
+            }
+
+            if (ss.str() != "") {
+                buffer += ss.str() + newLine;
+            }
+
             endInnerElement();
         }
 
+        // --- Attirbute Setting Functions ---
         void setName(const std::string& name) {
             buffer += " Name=\"" + name + "\"";
         }
@@ -377,26 +423,6 @@ class SimpleXdmf {
                 std::string error_message = "Invalid Center type = " + type + " is passed to setCenter().";
                 throw std::invalid_argument(error_message);
             }
-        }
-
-        void convertFromVariadicArgsToStringInternal(const std::stringstream& ss) {}
-
-        template<typename First, typename... Rests>
-        void convertFromVariadicArgsToStringInternal(std::stringstream& ss, First&& first, Rests&&... rest) {
-            ss << first;
-
-            constexpr std::size_t parameter_pack_size = sizeof...(Rests);
-            if (parameter_pack_size > 0) {
-                ss << " ";
-                convertFromVariadicArgsToStringInternal(ss, std::forward<Rests>(rest)...);
-            }
-        }
-
-        template<typename... Args>
-        std::string convertFromVariadicArgsToString(Args&&... args) {
-            std::stringstream ss;
-            convertFromVariadicArgsToStringInternal(ss, std::forward<Args>(args)...);
-            return ss.str();
         }
 
         template<typename... Args>

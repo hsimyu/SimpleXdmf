@@ -10,13 +10,17 @@ int main() {
 
             gen.beginDataItem("Uniform");
             gen.setName("Data1");
-            gen.addItem();
-            gen.addItem();
+
+            std::vector<float> values{1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
+            gen.addItem(values);
             gen.endDataItem();
 
             gen.beginDataItem("Collection");
             gen.setName("Data2");
-            gen.addItem();
+
+            std::vector<float> values2{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.05, 12.4};
+            gen.addItem(values2);
+
             gen.endDataItem();
 
             gen.beginDataItem("Tree");
