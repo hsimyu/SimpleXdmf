@@ -2,6 +2,8 @@
 
 int main() {
     SimpleXdmf gen;
+
+    // Some settings
     gen.setNewLineCodeLF();
 
     const int nx = 5;
@@ -10,7 +12,7 @@ int main() {
     gen.beginDomain();
     gen.setName("Domain1");
         gen.beginGrid();
-        gen.setName("Two Quads");
+        gen.setName("Grid1");
             gen.beginStructuredTopology("2DCoRectMesh");
             gen.setNumberOfElements(ny, nx);
             gen.setName("Topo1");
@@ -40,6 +42,7 @@ int main() {
                     gen.setDimensions(ny, nx);
                     gen.setFormat("XML");
 
+                    // Adding from std::vector
                     std::vector<float> node_values;
 
                     for(int i = 0; i < (nx * ny); ++i) {
