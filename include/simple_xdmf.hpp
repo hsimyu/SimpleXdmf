@@ -101,14 +101,6 @@ class SimpleXdmf {
             buffer += " " + prefix + "Type=\"" + type + "\"";
         }
 
-        std::string addFormat() {
-            return "Format=\"XML\"";
-        }
-
-        std::string addDimensions() {
-            return "Dimensions=\"1 1 2\"";
-        }
-
     public:
         SimpleXdmf(const std::string& _version = "3.0") {
             version = _version;
@@ -219,6 +211,22 @@ class SimpleXdmf {
 
         void endDataItem() {
             endElement("DataItem");
+        }
+
+        void setName(const std::string& name) {
+            buffer += " Name=\"" + name + "\"";
+        }
+
+        void setFormat() {
+            buffer += " Format=\"XML\"";
+        }
+
+        void setDimensions() {
+            buffer += " Dimensions=\"1 1 2\"";
+        }
+
+        void setNumberOfElements() {
+            buffer += " NumberOfElements=\"1 1 2\"";
         }
 };
 
