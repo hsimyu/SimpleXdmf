@@ -80,6 +80,33 @@ int main() {
 }
 ```
 
+This sample code generates
+```xml
+<?xml version="1.0" ?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="3.0">
+    <Domain Name="Domain1">
+        <Grid GridType="Uniform">
+            <Topology TopologyType="2DCoRectMesh" NumberOfElements="3 5" Name="Topo1"/>
+            <Geometry GeometryType="ORIGIN_DXDY" Dimensions="3 5" Name="Geom1">
+                <DataItem DataItemType="Uniform" Dimensions="2" Format="XML">
+                    0 0 
+                </DataItem>
+                <DataItem DataItemType="Uniform" Dimensions="2" Format="XML">
+                    0.5 0.5 
+                </DataItem>
+            </Geometry>
+            <Attribute AttributeType="Scalar" Center="Node" Name="Attr1">
+                <DataItem DataItemType="Uniform" Dimensions="3 5" Format="XML">
+                    0 1 2 3 4 5 6 7 8 9 
+                    10 11 12 13 14
+                </DataItem>
+            </Attribute>
+        </Grid>
+    </Domain>
+</Xdmf>
+```
+
 See the examples in the examples directory.
 
 # License
