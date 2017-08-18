@@ -5,7 +5,7 @@ int main() {
 
     gen.beginDomain();
         gen.beginTopology("3DCoRectMesh");
-        gen.setDimensions();
+        gen.setNumberOfElements(3, 5);
         gen.setName("Topo1");
 
             gen.beginDataItem("Uniform");
@@ -26,6 +26,7 @@ int main() {
         gen.endTopology();
 
         gen.beginGeometory();
+        gen.setDimensions(3, 5);
         gen.setName("Geom1");
             gen.beginDataItem();
             gen.endDataItem();
@@ -34,6 +35,7 @@ int main() {
         gen.beginAttribute();
         gen.setName("Attr1");
             gen.beginDataItem();
+            gen.setDimensions(3, 5);
             gen.endDataItem();
         gen.endAttribute();
     gen.endDomain();

@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <fstream>
+#include <sstream>
 
 class SimpleXdmf {
     private:
@@ -378,12 +379,36 @@ class SimpleXdmf {
             }
         }
 
-        void setDimensions() {
-            buffer += " Dimensions=\"1 1 2\"";
+        void convertFromVariadicArgsToStringInternal(const std::stringstream& ss) {}
+
+        template<typename First, typename... Rests>
+        void convertFromVariadicArgsToStringInternal(std::stringstream& ss, First&& first, Rests&&... rest) {
+            ss << first;
+
+            constexpr std::size_t parameter_pack_size = sizeof...(Rests);
+            if (parameter_pack_size > 0) {
+                ss << " ";
+                convertFromVariadicArgsToStringInternal(ss, std::forward<Rests>(rest)...);
+            }
         }
 
-        void setNumberOfElements() {
-            buffer += " NumberOfElements=\"1 1 2\"";
+        template<typename... Args>
+        std::string convertFromVariadicArgsToString(Args&&... args) {
+            std::stringstream ss;
+            convertFromVariadicArgsToStringInternal(ss, std::forward<Args>(args)...);
+            return ss.str();
+        }
+
+        template<typename... Args>
+        void setDimensions(Args&&... args) {
+            std::string dimString = convertFromVariadicArgsToString(std::forward<Args>(args)...);
+            buffer += " Dimensions=\"" + dimString + "\"";
+        }
+
+        template<typename... Args>
+        void setNumberOfElements(Args&&... args) {
+            std::string dimString = convertFromVariadicArgsToString(std::forward<Args>(args)...);
+            buffer += " NumberOfElements=\"" + dimString + "\"";
         }
 };
 
