@@ -4,7 +4,7 @@ int main() {
     SimpleXdmf gen;
 
     gen.beginDomain();
-        gen.beginTopology();
+        gen.beginTopology(SimpleXdmf::TopologyType::_2DCoRectMesh);
             gen.beginDataItem();
             gen.endDataItem();
         gen.endTopology();

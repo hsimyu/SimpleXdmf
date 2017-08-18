@@ -86,7 +86,7 @@ class SimpleXdmf {
         }
 
         enum class DataItemType {Uniform};
-        enum class TopologyType {twoDRectMesh};
+        enum class TopologyType {_2DSMesh, _2DRectMesh, _2DCoRectMesh, _3DSMesh, _3DRectMesh, _3DCoRectMesh};
         enum class GeometryType {Uniform};
         enum class AttributeType {Scalar, Vector};
         enum class AttributeCenter {Node};
@@ -102,10 +102,35 @@ class SimpleXdmf {
             endElement();
         };
 
-        void beginTopology(TopologyType type = TopologyType::twoDRectMesh) {
+        void beginTopology(TopologyType type = TopologyType::_2DCoRectMesh) {
             beginElement();
-            content += "<Topology TopologyType=\"2DRectMesh\">" + newLine;
+
+            using TType = TopologyType;
+            std::string typeString;
+
+            switch(type) {
+                case TType::_2DSMesh:
+                    typeString = "2DSMesh";
+                case TType::_2DRectMesh:
+                    typeString = "2DRectMesh";
+                    break;
+                case TType::_2DCoRectMesh:
+                    typeString = "2DCoRectMesh";
+                    break;
+                case TType::_3DSMesh:
+                    typeString = "3DSMesh";
+                    break;
+                case TType::_3DRectMesh:
+                    typeString = "3DRectMesh";
+                    break;
+                case TType::_3DCoRectMesh:
+                    typeString = "3DCoRectMesh";
+                    break;
+            }
+
+            content += "<Topology TopologyType=\"" + typeString + "\">" + newLine;
         }
+
         void endTopology() {
             insertIndent();
             content += "</Topology>" + newLine;
