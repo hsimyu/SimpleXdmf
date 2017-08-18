@@ -95,6 +95,18 @@ class SimpleXdmf {
             buffer.clear();
         }
 
+        void endOneLineElement(const std::string& tag) {
+            if (buffer != "") {
+                commitOneLineBuffer();
+            }
+            backIndent();
+        }
+
+        void commitOneLineBuffer() {
+            content += buffer + "/>" + newLine;
+            buffer.clear();
+        }
+
         void beginInnerElement() {
             if (buffer != "") {
                 commitBuffer();
@@ -322,6 +334,15 @@ class SimpleXdmf {
 
         void endTopology() {
             endElement("Topology");
+        }
+
+        void beginStructuredTopology(const std::string& type = "2DCoRectMesh") {
+            beginElement("Topology");
+            addType(type);
+        }
+
+        void endStructuredTopology() {
+            endOneLineElement("Topology");
         }
 
         void beginGeometory(const std::string& type = "XYZ"){
