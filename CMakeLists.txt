@@ -3,13 +3,12 @@ project(SimpleXdmf)
 
 # options
 option(TEST_SIMPLE_XDMF "Test SimpleXdmf with GoogleTest." ON)
+option(BUILD_SIMPLE_XDMF_EXAMPLES "Build example uses of SimpleXdmf." ON)
 
 # add submodules
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-# add include
-
-if(TEST_SIMPLE_XDMF)
+if(BUILD_SIMPLE_XDMF_EXAMPLES OR TEST_SIMPLE_XDMF)
     # -- check C++11 --
     include(CheckCXXCompilerFlag)
     CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
@@ -34,10 +33,15 @@ if(TEST_SIMPLE_XDMF)
         message(STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
     endif()
 
+endif()
+
+if(BUILD_SIMPLE_XDMF_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+if(TEST_SIMPLE_XDMF)
     enable_testing()
     add_subdirectory(${CMAKE_SOURCE_DIR}/googletest)
     include_directories(${CMAKE_SOURCE_DIR}/googletest/googletest/include)
     add_subdirectory(test)
 endif()
-
-
