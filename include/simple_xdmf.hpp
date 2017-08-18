@@ -10,8 +10,7 @@
 
 class SimpleXdmf {
     private:
-        const std::string header = R"(
-<?xml version="1.0" ?>
+        const std::string header = R"(<?xml version="1.0" ?>
 <!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
 )";
         std::string content;
@@ -268,7 +267,7 @@ class SimpleXdmf {
     public:
         SimpleXdmf(const std::string& _version = "3.0") {
             version = _version;
-            setNewLineCode();
+            setNewLineCodeCRLF();
             setIndentSpaceSize();
             beginXdmf();
         }
@@ -285,12 +284,19 @@ class SimpleXdmf {
             }
         }
 
-        void setNewLineCode() {
-            const char CR = '\r';
-            const char LF = '\n';
-            const char* CRLF = "\r\n";
-
+        void setNewLineCodeLF() {
+            constexpr char LF = '\n';
             newLine = LF;
+        }
+
+        void setNewLineCodeCR() {
+            constexpr char CR = '\r';
+            newLine = CR;
+        }
+
+        void setNewLineCodeCRLF() {
+            constexpr const char* CRLF = "\r\n";
+            newLine = CRLF;
         }
 
         void generate(const std::string file_name) {
@@ -351,7 +357,7 @@ class SimpleXdmf {
         }
 
         void endGeometory(){
-            endElement("Geomerry");
+            endElement("Geometry");
         }
 
         void beginAttribute(const std::string& type = "Scalar"){
@@ -373,7 +379,7 @@ class SimpleXdmf {
         }
 
         template<typename T>
-        void addItem(const std::vector<T>& values) {
+        void addVector(const std::vector<T>& values) {
             beginInnerElement();
 
             std::stringstream ss;
@@ -396,6 +402,25 @@ class SimpleXdmf {
             if (ss.str() != "") {
                 buffer += ss.str() + newLine;
             }
+
+            endInnerElement();
+        }
+
+        void addItemInternal(std::stringstream& ss) {}
+
+        template<typename First, typename... Rests>
+        void addItemInternal(std::stringstream& ss, First&& first, Rests&&... rests) {
+            ss << first << " ";
+            addItemInternal(ss, rests...);
+        }
+
+        template<typename... Args>
+        void addItem(Args&&... args) {
+            beginInnerElement();
+
+            std::stringstream ss;
+            addItemInternal(ss, std::forward<Args>(args)...);
+            buffer += ss.str() + newLine;
 
             endInnerElement();
         }
