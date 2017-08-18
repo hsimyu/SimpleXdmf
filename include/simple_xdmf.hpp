@@ -1,6 +1,7 @@
 #ifndef SIMPLE_XDMF_HPP_INCLUDED
 #define SIMPLE_XDMF_HPP_INCLUDED
 
+#include <iostream>
 #include <array>
 #include <string>
 #include <fstream>
@@ -308,6 +309,15 @@ class SimpleXdmf {
             endElement("Geomerry");
         }
 
+        void beginAttribute(const std::string& type = "Scalar"){
+            beginElement("Attribute");
+            addType(type);
+        }
+
+        void endAttribute(){
+            endElement("Attribute");
+        }
+
         void beginDataItem(const std::string& type = "Uniform") {
             beginElement("DataItem");
             addType(type);
@@ -327,8 +337,45 @@ class SimpleXdmf {
             buffer += " Name=\"" + name + "\"";
         }
 
-        void setFormat() {
-            buffer += " Format=\"XML\"";
+        void setFormat(const std::string& type = "XML") {
+            if (checkIsValidType<formatTypeLength>(FormatType, type)) {
+                buffer += " Format=\"" + type + "\"";
+            } else {
+                std::string error_message = "Invalid Format type = " + type + " is passed to setFormat().";
+                throw std::invalid_argument(error_message);
+            }
+        }
+
+        void setPrecision(const std::string& type = "4") {
+            if (checkIsValidType<precisionTypeLength>(PrecisionType, type)) {
+                buffer += " Precision=\"" + type + "\"";
+            } else {
+                std::string error_message = "Invalid Precision type = " + type + " is passed to setPrecision().";
+                throw std::invalid_argument(error_message);
+            }
+        }
+
+        void setNumberType(const std::string& type = "Float") {
+            if (checkIsValidType<numberTypeLength>(NumberType, type)) {
+                buffer += " NumberType=\"" + type + "\"";
+            } else {
+                std::string error_message = "Invalid Number type = " + type + " is passed to setNumberType().";
+                throw std::invalid_argument(error_message);
+            }
+        }
+
+        void setCenter(const std::string& type = "Node") {
+            if (current_tag != TAG::Attribute) {
+                std::cerr << "[ERROR] setCenter() cannot be called for not Attribute Tag." << std::endl;
+                return;
+            }
+
+            if (checkIsValidType<attributeCenterLength>(AttributeCenter, type)) {
+                buffer += " Center=\"" + type + "\"";
+            } else {
+                std::string error_message = "Invalid Center type = " + type + " is passed to setCenter().";
+                throw std::invalid_argument(error_message);
+            }
         }
 
         void setDimensions() {

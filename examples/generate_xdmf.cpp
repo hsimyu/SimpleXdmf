@@ -31,6 +31,11 @@ int main() {
             gen.endDataItem();
         gen.endGeometory();
 
+        gen.beginAttribute();
+        gen.setName("Attr1");
+            gen.beginDataItem();
+            gen.endDataItem();
+        gen.endAttribute();
     gen.endDomain();
 
     gen.generate("test.xmf");
