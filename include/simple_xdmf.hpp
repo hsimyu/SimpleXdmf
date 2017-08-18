@@ -12,6 +12,7 @@ class SimpleXdmf {
 <!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
 )";
         std::string content;
+        std::string buffer;
         std::string version;
         std::string newLine;
         std::string indent;
@@ -29,17 +30,32 @@ class SimpleXdmf {
 
         void insertIndent() {
             for(unsigned int i = 0; i < currentIndentation; ++i) {
-                content += indent;
+                buffer += indent;
             }
         }
 
-        void beginElement() {
+        void beginElement(const std::string& tag) {
+            if (buffer != "") {
+                commitBuffer();
+            }
             addIndent();
             insertIndent();
+            buffer += "<" + tag;
         }
 
-        void endElement() {
+        void endElement(const std::string& tag) {
+            if (buffer != "") {
+                commitBuffer();
+            }
+            insertIndent();
+            buffer += "</" + tag;
+            commitBuffer();
             backIndent();
+        }
+
+        void commitBuffer() {
+            content += buffer + ">" + newLine;
+            buffer.clear();
         }
 
         // for checking valid types
@@ -78,6 +94,19 @@ class SimpleXdmf {
             }
 
             return is_valid;
+        }
+
+        // Adding Valid Attributes
+        void addType(const std::string& prefix, const std::string& type) {
+            buffer += " " + prefix + "Type=\"" + type + "\"";
+        }
+
+        std::string addFormat() {
+            return "Format=\"XML\"";
+        }
+
+        std::string addDimensions() {
+            return "Dimensions=\"1 1 2\"";
         }
 
     public:
@@ -125,21 +154,18 @@ class SimpleXdmf {
         }
 
         void beginDomain() {
-            beginElement();
-            content += "<Domain>" + newLine;
+            beginElement("Domain");
         };
 
         void endDomain() {
-            insertIndent();
-            content += "</Domain>" + newLine;
-            endElement();
+            endElement("Domain");
         };
 
         void beginGrid(const std::string& type = "Uniform") {
-            beginElement();
+            beginElement("Grid");
 
             if (checkIsValidType<gridTypeLength>(GridType, type)) {
-                content += "<Grid GridType=\"" + type + "\">" + newLine;
+                addType("Grid", type);
             } else {
                 std::string error_message = "Invalid Grid type = " + type + " is passed to beginGrid().";
                 throw std::invalid_argument(error_message);
@@ -147,16 +173,14 @@ class SimpleXdmf {
         }
 
         void endGrid() {
-            insertIndent();
-            content += "</Grid>" + newLine;
-            endElement();
+            endElement("Grid");
         }
 
         void beginTopology(const std::string& type = "2DCoRectMesh") {
-            beginElement();
+            beginElement("Topology");
 
             if (checkIsValidType<topologyTypeLength>(TopologyType, type)) {
-                content += "<Topology TopologyType=\"" + type + "\">" + newLine;
+                addType("Topology", type);
             } else {
                 std::string error_message = "Invalid Topology type = " + type + " is passed to beginTopology().";
                 throw std::invalid_argument(error_message);
@@ -164,16 +188,14 @@ class SimpleXdmf {
         }
 
         void endTopology() {
-            insertIndent();
-            content += "</Topology>" + newLine;
-            endElement();
+            endElement("Topology");
         }
 
         void beginGeometory(const std::string& type = "XYZ"){
-            beginElement();
+            beginElement("Geometry");
 
             if (checkIsValidType<geometryTypeLength>(GeometryType, type)) {
-                content += "<Geometry GeometryType=\"" + type + "\">" + newLine;
+                addType("Geometry", type);
             } else {
                 std::string error_message = "Invalid Geometry type = " + type + " is passed to beginGeometry().";
                 throw std::invalid_argument(error_message);
@@ -181,16 +203,14 @@ class SimpleXdmf {
         }
 
         void endGeometory(){
-            insertIndent();
-            content += "</Geometry>" + newLine;
-            endElement();
+            endElement("Geomerry");
         }
 
         void beginDataItem(const std::string& type = "Uniform") {
-            beginElement();
+            beginElement("DataItem");
 
             if (checkIsValidType<dataItemTypeLength>(DataItemType, type)) {
-                content += "<DataItem ItemType=\"" + type + "\">" + newLine;
+                addType("DataItem", type);
             } else {
                 std::string error_message = "Invalid DataItem type = " + type + " is passed to beginDataItem().";
                 throw std::invalid_argument(error_message);
@@ -198,9 +218,7 @@ class SimpleXdmf {
         }
 
         void endDataItem() {
-            insertIndent();
-            content += "</DataItem>" + newLine;
-            endElement();
+            endElement("DataItem");
         }
 };
 
