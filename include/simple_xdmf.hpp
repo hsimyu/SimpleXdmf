@@ -459,7 +459,7 @@ class SimpleXdmf {
 
         void setCenter(const std::string& type = "Node") {
             if (current_tag != TAG::Attribute) {
-                std::cerr << "[ERROR] setCenter() cannot be called for not Attribute Tag." << std::endl;
+                std::cerr << "[ERROR] setCenter() cannot be called when current Tag is not Attribute." << std::endl;
                 return;
             }
 
@@ -469,6 +469,14 @@ class SimpleXdmf {
                 std::string error_message = "Invalid Center type = " + type + " is passed to setCenter().";
                 throw std::invalid_argument(error_message);
             }
+        }
+
+        void setFunction(const std::string& func) {
+            if (current_tag != TAG::DataItem) {
+                std::cerr << "[ERROR] setFunction() cannot be called when current Tag is not DataItem." << std::endl;
+                return;
+            }
+            buffer += " Function=\"" + func + "\"";
         }
 
         template<typename... Args>
