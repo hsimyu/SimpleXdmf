@@ -14,6 +14,7 @@ add the line below into your CMakeLists.txt.
 ```cmake
 add_subdirectory(SimpleXdmf)
 ```
+Turn ON options for cmake if you want include SimpleXdmf tests and examples building.
 
 # How To Use
 ```cpp
@@ -24,6 +25,7 @@ int main() {
 
     // Some settings
     gen.setNewLineCodeLF();
+    gen.setIndentSpaceSize(4);
 
     const int nx = 5;
     const int ny = 3;
@@ -84,7 +86,7 @@ This sample code generates
 ```xml
 <?xml version="1.0" ?>
 <!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
-<Xdmf Version="3.0">
+<Xdmf>
     <Domain Name="Domain1">
         <Grid GridType="Uniform">
             <Topology TopologyType="2DCoRectMesh" NumberOfElements="3 5" Name="Topo1"/>
@@ -107,7 +109,68 @@ This sample code generates
 </Xdmf>
 ```
 
-See the examples in the examples directory.
+All begin*() functions insert a new tag and set the current tag to specified one.
+All set*() functions set a passed argument for the current tag.
+
+SimpleXdmf also have a reference management system.
+setReferenceFromName() function automatically set the Xpath if the passed name exists.
+
+```cpp
+#include <simple_xdmf.hpp>
+
+int main() {
+    SimpleXdmf gen;
+
+    const int nx = 5;
+    const int ny = 3;
+
+    gen.beginDomain();
+        gen.beginGrid();
+        gen.setName("Grid1");
+        gen.endGrid();
+
+        gen.beginGrid();
+        gen.setName("Grid2");
+        gen.setReferenceFromName("Grid1"); // set Xpath as Reference attribute
+        gen.endGrid();
+
+        gen.beginGrid();
+        gen.setName("Grid3");
+            gen.addReferenceFromName("Grid3"); // as inner reference element
+        gen.endGrid();
+
+        gen.beginGrid();
+        gen.setName("Grid4");
+        gen.setReference("/Xdmf/Domain/Grid2"); // or directly setting
+        gen.endGrid();
+    gen.endDomain();
+
+    gen.generate("reference_management.xmf");
+    return 0;
+}
+```
+
+This sample code generates
+
+```xml
+<?xml version="1.0" ?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf>
+    <Domain>
+        <Grid GridType="Uniform" Name="Grid1">
+        </Grid>
+        <Grid GridType="Uniform" Name="Grid2" Reference="/Xdmf/Domain/Grid[@Name='Grid1']">
+        </Grid>
+        <Grid GridType="Uniform" Name="Grid3">
+            /Xdmf/Domain/Grid[@Name='Grid3'] 
+        </Grid>
+        <Grid GridType="Uniform" Name="Grid4" Reference="/Xdmf/Domain/Grid2">
+        </Grid>
+    </Domain>
+</Xdmf>
+```
+
+For details, see the examples in the examples directory.
 
 # License
 MIT

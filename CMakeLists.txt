@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 project(SimpleXdmf)
 
 # options
-option(TEST_SIMPLE_XDMF "Test SimpleXdmf with GoogleTest." ON)
-option(BUILD_SIMPLE_XDMF_EXAMPLES "Build example uses of SimpleXdmf." ON)
+option(TEST_SIMPLE_XDMF "Test SimpleXdmf with GoogleTest." OFF)
+option(BUILD_SIMPLE_XDMF_EXAMPLES "Build example uses of SimpleXdmf." OFF)
 
 # add submodules
 include_directories(${CMAKE_SOURCE_DIR}/include)

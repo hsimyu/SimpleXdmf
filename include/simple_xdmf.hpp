@@ -24,7 +24,7 @@ class SimpleXdmf {
 
         // indent management
         std::string indent;
-        unsigned int currentIndentation = 0;
+        unsigned int currentIndentation = -1;
         void addIndent() {
             ++currentIndentation;
         }
