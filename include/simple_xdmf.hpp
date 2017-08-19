@@ -17,6 +17,7 @@ class SimpleXdmf {
         std::string content;
         std::string buffer;
         std::string newLine;
+        std::string currentXpath = "";
         bool endEdit = false;
         unsigned int innerElementPerLine = 10;
 
@@ -40,7 +41,7 @@ class SimpleXdmf {
 
 
         // store current processing tag information for type validation
-        enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain, Inner};
+        enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain, Xdmf, Inner};
         TAG current_tag;
 
         void setCurrentTag(const std::string& tag) {
@@ -64,6 +65,8 @@ class SimpleXdmf {
                 current_tag = TAG::Information;
             } else if (tag == "Inner") {
                 current_tag = TAG::Inner;
+            } else if (tag == "Xdmf") {
+                current_tag = TAG::Xdmf;
             }
         }
 
@@ -82,11 +85,20 @@ class SimpleXdmf {
 
         std::string getXpath(const std::string& name) {
             if (xpathMap.count(name) > 0) {
-                return xpathMap[name];
+                return xpathMap[name] + "[@Name='" + name + "']";
             } else {
                 std::cerr << "[ERROR] Non-existente Name \"" << name << "\" passed to getXpath(). " << std::endl;
                 return "";
             }
+        }
+
+        void proceedCurrentXpath() {
+            currentXpath += "/" + getCurrentTagString();
+        }
+
+        void regressCurrentXpath() {
+            auto last_split_index = currentXpath.rfind("/");
+            currentXpath.erase(currentXpath.begin() + last_split_index, currentXpath.end());
         }
 
 
@@ -101,6 +113,7 @@ class SimpleXdmf {
             buffer += "<" + tag;
 
             setCurrentTag(tag);
+            proceedCurrentXpath();
         }
 
         void endElement(const std::string& tag) {
@@ -112,6 +125,7 @@ class SimpleXdmf {
             buffer += "</" + tag;
             commitBuffer();
 
+            regressCurrentXpath();
             backIndent();
         }
 
@@ -223,12 +237,15 @@ class SimpleXdmf {
                 case TAG::Domain:
                     isValid = true;
                     break;
+                case TAG::Xdmf:
+                    isValid = true;
+                    break;
                 default:
                     break;
             }
 
             if (!isValid) {
-                std::string tagString = getTagString();
+                std::string tagString = getCurrentTagString();
 
                 std::string error_message = "Invalid " + tagString + " type = " + type + " is passed to.";
                 throw std::invalid_argument(error_message);
@@ -237,7 +254,7 @@ class SimpleXdmf {
             return isValid;
         }
 
-        std::string getTagString() {
+        std::string getCurrentTagString() {
             switch (current_tag) {
                 case TAG::Grid:
                     return "Grid";
@@ -259,6 +276,8 @@ class SimpleXdmf {
                     return "Domain";
                 case TAG::Inner:
                     return "Inner";
+                case TAG::Xdmf:
+                    return "Xdmf";
                 default:
                     return "";
             }
@@ -267,7 +286,7 @@ class SimpleXdmf {
         // Adding Valid Attributes
         void addType(const std::string& type) {
             if (checkType(type)) {
-                buffer += " " + getTagString() + "Type=\"" + type + "\"";
+                buffer += " " + getCurrentTagString() + "Type=\"" + type + "\"";
             }
         }
 
@@ -481,7 +500,7 @@ class SimpleXdmf {
 
         // --- Attirbute Setting Functions ---
         void setName(const std::string& name) {
-            addNewXpath(name, "test");
+            addNewXpath(name, currentXpath);
             buffer += " Name=\"" + name + "\"";
         }
 
