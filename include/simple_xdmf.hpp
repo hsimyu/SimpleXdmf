@@ -4,6 +4,7 @@
 #include <iostream>
 #include <array>
 #include <vector>
+#include <map>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -17,16 +18,13 @@ class SimpleXdmf {
         std::string buffer;
         std::string version;
         std::string newLine;
-        std::string indent;
+        bool endEdit = false;
         unsigned int innerElementPerLine = 10;
 
-        // store current processing tag information for type validation
-        enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain, Inner};
-        TAG current_tag;
 
+        // indent management
+        std::string indent;
         unsigned int currentIndentation = 0;
-        bool endEdit = false;
-
         void addIndent() {
             ++currentIndentation;
         }
@@ -40,6 +38,11 @@ class SimpleXdmf {
                 buffer += indent;
             }
         }
+
+
+        // store current processing tag information for type validation
+        enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain, Inner};
+        TAG current_tag;
 
         void setCurrentTag(const std::string& tag) {
             if (tag == "Grid") {
@@ -65,6 +68,30 @@ class SimpleXdmf {
             }
         }
 
+
+        // Reference Management
+        // xpathMap[Name] => Xpath
+        std::map<std::string, std::string> xpathMap;
+
+        void addNewXpath(const std::string& name, const std::string& xpath) {
+            if (xpathMap.count(name) > 0) {
+                std::cerr << "[ERROR] Duplicate Name attribute \"" << name << "\" may cause incorrect Xpath reference. " << std::endl;
+            } else {
+                xpathMap[name] = xpath;
+            }
+        }
+
+        std::string getXpath(const std::string& name) {
+            if (xpathMap.count(name) > 0) {
+                return xpathMap[name];
+            } else {
+                std::cerr << "[ERROR] Non-existente Name \"" << name << "\" passed to getXpath(). " << std::endl;
+                return "";
+            }
+        }
+
+
+        // Structure Management
         void beginElement(const std::string& tag) {
             if (buffer != "") {
                 commitBuffer();
@@ -128,6 +155,8 @@ class SimpleXdmf {
             buffer.clear();
         }
 
+
+        // Type checking
         static constexpr int dataItemTypeLength = 6;
         static constexpr int gridTypeLength = 4;
         static constexpr int topologyTypeLength = 6;
@@ -453,6 +482,7 @@ class SimpleXdmf {
 
         // --- Attirbute Setting Functions ---
         void setName(const std::string& name) {
+            addNewXpath(name, "test");
             buffer += " Name=\"" + name + "\"";
         }
 
@@ -537,6 +567,21 @@ class SimpleXdmf {
         void setNumberOfElements(Args&&... args) {
             std::string dimString = convertFromVariadicArgsToString(std::forward<Args>(args)...);
             buffer += " NumberOfElements=\"" + dimString + "\"";
+        }
+
+        // Reference Attribute management
+        void setReference(const std::string& xpath) {
+            buffer += " Reference=\"" + xpath + "\"";
+        }
+
+        void setReferenceFromName(const std::string& name) {
+            auto xpath = getXpath(name);
+            buffer += " Reference=\"" + xpath + "\"";
+        }
+
+        void addReferenceFromName(const std::string& name) {
+            auto xpath = getXpath(name);
+            addItem(xpath);
         }
 };
 
