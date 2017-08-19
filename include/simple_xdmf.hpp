@@ -479,6 +479,20 @@ class SimpleXdmf {
             buffer += " Function=\"" + func + "\"";
         }
 
+        void setSection(const std::string& sect) {
+            if (current_tag != TAG::Grid) {
+                std::cerr << "[ERROR] setSection() cannot be called when current Tag is not Grid." << std::endl;
+                return;
+            }
+
+            if (sect == "DataItem" || sect == "All") {
+                buffer += " Selection=\"" + sect + "\"";
+            } else {
+                std::string error_message = "Invalid Section type = " + sect + " is passed to setSection().";
+                throw std::invalid_argument(error_message);
+            }
+        }
+
         template<typename... Args>
         void setDimensions(Args&&... args) {
             std::string dimString = convertFromVariadicArgsToString(std::forward<Args>(args)...);
