@@ -378,6 +378,32 @@ class SimpleXdmf {
             endElement("DataItem");
         }
 
+        void beginSet(const std::string& type = "Node") {
+            beginElement("Set");
+            addType(type);
+        }
+
+        void endSet() {
+            endElement("Set");
+        }
+
+        void beginTime(const std::string& type = "Single") {
+            beginElement("Time");
+            addType(type);
+        }
+
+        void endTime() {
+            endElement("Time");
+        }
+
+        void beginInformation() {
+            beginElement("Information");
+        }
+
+        void endInformation() {
+            endElement("Information");
+        }
+
         template<typename T>
         void addVector(const std::vector<T>& values) {
             beginInnerElement();
@@ -491,6 +517,14 @@ class SimpleXdmf {
                 std::string error_message = "Invalid Section type = " + sect + " is passed to setSection().";
                 throw std::invalid_argument(error_message);
             }
+        }
+
+        void setValue(const std::string& value) {
+            if (current_tag != TAG::Time && current_tag != TAG::Information) {
+                std::cerr << "[ERROR] setValue() cannot be called when current Tag is not Time and Information." << std::endl;
+                return;
+            }
+            buffer += " Value=\"" + value + "\"";
         }
 
         template<typename... Args>
