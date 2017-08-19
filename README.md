@@ -109,11 +109,61 @@ This sample code generates
 </Xdmf>
 ```
 
-All begin*() functions insert a new tag and set the current tag to specified one.
-All set*() functions set a passed argument for the current tag.
+## Correct order of calling functions
+SimpleXdmf assumes begin/add/end structure.
+When you insert a new tag, first please call a begin*() function.
+After you called begin, set*() functions can set a passed argument for the current tag.
+After you inserted arbitrary elements within the tag, please call the corresponding end*() function.
 
-SimpleXdmf also have a reference management system.
-setReferenceFromName() function automatically set the Xpath if the passed name exists.
+add*() functions insert raw elements without tag.
+Use it to describe values in DataItem tag.
+
+## Supported Functions
+Supported begin/end functions are
+- beginDomain(const std::string& DomainType) / endDomain();
+- beginGrid(const std::string& GridType) / endGrid();
+- beginTopology(const std::string& TopologyType) / endTopology();
+- beginStructuredTopology(const std::string& TopologyType) / endStructuredTopology();
+- beginGeometry(const std::string& GeometryType) / endGeometry();
+- beginDataItem(const std::string& DataItemType) / endDataItem();
+- beginAttribute(const std::string& AttributeType) / endAttribute();
+- beginSet(const std::string& SetType) / endSet();
+- beginTime(const std::string& TimeType) / endTime();
+- beginInformation(const std::string& InformationType) / endInformation();
+
+Supported set functions are
+- setName(const std::string& Name)
+- setVersion(const std::string& Version)
+- setFormat(const std::string& Format)
+- setPrecision(const std::string& Precision)
+- setNumberType(const std::string& NumberType)
+- setCenter(const std::string& Center)
+- setFunction(const std::string& Function)
+- setSection(const std::string& Section)
+- setValue(const std::string& Value)
+- setReference(const std::string& Reference)
+- setReferenceFromName(const std::string& Name) (see below)
+- setDimensions(Args&&... args)
+- setNumberOfElements(Args&&... args)
+
+Supported add functions are
+- addItem(Args&&... args)
+- addVector(const std::vector<T>& values)
+- addReferenceFromName(cosnt std::string& Name) (see below)
+
+Some configure functions are defined.
+- setNewLineCodeLF()
+- setNewLineCodeCR()
+- setNewLineCodeCRLF()
+- setIndentSpaceSize(const int size = 4); if size = 0, use '\t'.
+
+I/O function is now only one.
+- void generate(const std::string& filename)
+- std::string getRawString()
+
+## Reference management
+SimpleXdmf also have a simple reference management.
+setReferenceFromName() and addReferenceFromName() functions automatically set the Xpath if the passed name exists.
 
 ```cpp
 #include <simple_xdmf.hpp>
