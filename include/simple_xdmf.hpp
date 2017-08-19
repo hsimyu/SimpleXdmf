@@ -16,7 +16,6 @@ class SimpleXdmf {
 )";
         std::string content;
         std::string buffer;
-        std::string version;
         std::string newLine;
         bool endEdit = false;
         unsigned int innerElementPerLine = 10;
@@ -294,8 +293,7 @@ class SimpleXdmf {
         }
 
     public:
-        SimpleXdmf(const std::string& _version = "3.0") {
-            version = _version;
+        SimpleXdmf() {
             setNewLineCodeCRLF();
             setIndentSpaceSize();
             beginXdmf();
@@ -337,11 +335,12 @@ class SimpleXdmf {
 
         void beginXdmf() {
             endEdit = false;
-            content = header + "<Xdmf Version=\"" + version + "\">" + newLine;
+            content = header;
+            beginElement("Xdmf");
         }
 
         void endXdmf() {
-            content += "</Xdmf>";
+            endElement("Xdmf");
             endEdit = true;
         }
 
@@ -484,6 +483,14 @@ class SimpleXdmf {
         void setName(const std::string& name) {
             addNewXpath(name, "test");
             buffer += " Name=\"" + name + "\"";
+        }
+
+        void setVersion(const std::string& _version) {
+            if (current_tag != TAG::Xdmf) {
+                std::cerr << "[ERROR] setVersion() cannot be called when current Tag is not Xdmf." << std::endl;
+                return;
+            }
+            buffer += " Version=\"" + _version + "\"";
         }
 
         void setFormat(const std::string& type = "XML") {
