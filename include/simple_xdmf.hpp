@@ -349,7 +349,7 @@ class SimpleXdmf {
             if(!endEdit) endXdmf();
 
             std::ofstream ofs(file_name, std::ios::out);
-            ofs << content << std::endl;
+            ofs << content;
         }
 
         void beginXdmf() {
