@@ -33,6 +33,8 @@ if(BUILD_SIMPLE_XDMF_EXAMPLES OR TEST_SIMPLE_XDMF)
         message(STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
     endif()
 
+    find_package( Boost )
+    include_directories( ${Boost_INCLUDE_DIRS} )
 endif()
 
 if(BUILD_SIMPLE_XDMF_EXAMPLES)

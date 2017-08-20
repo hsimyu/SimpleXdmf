@@ -9,6 +9,12 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef USE_BOOST
+#include <functional>
+#include <boost/array.hpp>
+#include <boost/multi_array.hpp>
+#endif
+
 class SimpleXdmf {
     private:
         const std::string header = R"(<?xml version="1.0" ?>
@@ -523,6 +529,41 @@ class SimpleXdmf {
             endInnerElement();
         }
 
+        template<typename T>
+        void add2DArray(T** values_ptr, const int nx, const int ny) {
+            beginInnerElement();
+
+            std::stringstream ss;
+
+            size_t itr = 1;
+            size_t size = nx * ny;
+
+            for(size_t j = 1; j <= ny; ++j) {
+                for(size_t i = 1; i <= nx; ++i) {
+                    ss << values_ptr[i - 1][j - 1];
+
+                    if (itr < size) {
+                        ss << " ";
+
+                        if (itr % innerElementPerLine == 0) {
+                            buffer += ss.str() + newLine;
+                            insertIndent();
+                            ss.str("");
+                            ss.clear(std::stringstream::goodbit);
+                        }
+                    }
+
+                    ++itr;
+                }
+            }
+
+            if (ss.str() != "") {
+                buffer += ss.str() + newLine;
+            }
+
+            endInnerElement();
+        }
+
         template<typename T, int N>
         void addArray(const std::array<T, N>& values) {
             beginInnerElement();
@@ -577,6 +618,63 @@ class SimpleXdmf {
 
             endInnerElement();
         }
+
+#ifdef USE_BOOST
+        // based on c_index_order (row-major)
+        template<typename T, int N>
+        void addMultiArray(const boost::multi_array<T, N>& values, const bool isFortranStorageOrder = false) {
+            const int size = values.num_elements();
+
+            if (isFortranStorageOrder) {
+                addArray(values.data(), size);
+            } else {
+                using array_type = boost::multi_array<T, N>;
+                boost::array<array_type::index, N> index;
+
+                // initialize index
+                for(int i = 0; i < N; ++i) {
+                    index[i] = 0;
+                }
+                auto shape = values.shape();
+
+                // capture index and shape
+                std::function<void(int)> proceedIndex = [&index, &shape, &proceedIndex](const int axis){
+                    if (axis < N) {
+                        // increments from the most left index
+                        index[axis] += 1;
+                        if (index[axis] == shape[axis]) {
+                            index[axis] = 0;
+                            proceedIndex(axis + 1);
+                        }
+                    }
+                };
+
+                beginInnerElement();
+                std::stringstream ss;
+                for (size_t i = 1; i <= size; ++i) {
+                    ss << values(index);
+                    proceedIndex(0);
+
+                    if (i < size) {
+                        ss << " ";
+
+                        if (i % innerElementPerLine == 0) {
+                            buffer += ss.str() + newLine;
+                            insertIndent();
+                            ss.str("");
+                            ss.clear(std::stringstream::goodbit);
+                        }
+                    }
+                }
+
+                if (ss.str() != "") {
+                    buffer += ss.str() + newLine;
+                }
+
+                endInnerElement();
+            }
+        }
+#endif
 
         template<typename... Args>
         void addItem(Args&&... args) {
