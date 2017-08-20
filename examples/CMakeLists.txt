@@ -3,3 +3,6 @@ add_executable(example_generate_xdmf ${EXAMPLE_GENERATE_XDMF_SRC})
 
 set(EXAMPLE_REFERENCE_MANAGEMENT_SRC "reference_management.cpp")
 add_executable(example_reference_management ${EXAMPLE_REFERENCE_MANAGEMENT_SRC})
+
+set(EXAMPLE_UNSTRUCTURED_SRC "unstructured_topology.cpp")
+add_executable(example_unstructured_topology ${EXAMPLE_UNSTRUCTURED_SRC})

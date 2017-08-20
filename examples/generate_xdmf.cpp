@@ -55,7 +55,7 @@ int main() {
         gen.endGrid();
     gen.endDomain();
 
-    gen.generate("test.xmf");
+    gen.generate("generate_xdmf.xmf");
 
     return 0;
 }

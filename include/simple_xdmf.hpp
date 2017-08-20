@@ -41,7 +41,7 @@ class SimpleXdmf {
 
 
         // store current processing tag information for type validation
-        enum class TAG {DataItem, Grid, Topology, Geometry, Attribute, Set, Time, Information, Domain, Xdmf, Inner};
+        enum class TAG {DataItem, Grid, StructuredTopology, UnstructuredTopology, Geometry, Attribute, Set, Time, Information, Domain, Xdmf, Inner};
         TAG current_tag;
 
         void setCurrentTag(const std::string& tag) {
@@ -49,8 +49,10 @@ class SimpleXdmf {
                 current_tag = TAG::Grid;
             } else if (tag == "DataItem") {
                 current_tag = TAG::DataItem;
-            } else if (tag == "Topology") {
-                current_tag = TAG::Topology;
+            } else if (tag == "StructuredTopology") {
+                current_tag = TAG::StructuredTopology;
+            } else if (tag == "UnstructuredTopology") {
+                current_tag = TAG::UnstructuredTopology;
             } else if (tag == "Geometry") {
                 current_tag = TAG::Geometry;
             } else if (tag == "Attribute") {
@@ -110,9 +112,9 @@ class SimpleXdmf {
 
             addIndent();
             insertIndent();
-            buffer += "<" + tag;
-
             setCurrentTag(tag);
+
+            buffer += "<" + getCurrentTagString();
             proceedCurrentXpath();
         }
 
@@ -122,7 +124,7 @@ class SimpleXdmf {
             }
 
             insertIndent();
-            buffer += "</" + tag;
+            buffer += "</" + convertTagString(tag);
             commitBuffer();
 
             regressCurrentXpath();
@@ -172,7 +174,8 @@ class SimpleXdmf {
         // Type checking
         static constexpr int dataItemTypeLength = 6;
         static constexpr int gridTypeLength = 4;
-        static constexpr int topologyTypeLength = 6;
+        static constexpr int structuredTopologyTypeLength = 6;
+        static constexpr int unstructuredTopologyTypeLength = 17;
         static constexpr int geometryTypeLength = 6;
         static constexpr int attributeTypeLength = 5;
         static constexpr int attributeCenterLength = 5;
@@ -184,7 +187,8 @@ class SimpleXdmf {
 
         std::array<std::string, dataItemTypeLength> DataItemType {"Uniform", "Collection", "Tree", "HyperSlab", "Coordinates", "Function"};
         std::array<std::string, gridTypeLength> GridType {"Uniform", "Collection", "Tree", "Subset"};
-        std::array<std::string, topologyTypeLength> TopologyType {"2DSMesh", "2DRectMesh", "2DCoRectMesh", "3DSMesh", "3DRectMesh", "3DCoRectMesh"};
+        std::array<std::string, structuredTopologyTypeLength> StructuredTopologyType {"2DSMesh", "2DRectMesh", "2DCoRectMesh", "3DSMesh", "3DRectMesh", "3DCoRectMesh"};
+        std::array<std::string, unstructuredTopologyTypeLength> UnstructuredTopologyType {"Polyvertex", "Polyline", "Polygon", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Wedge", "Hexahedron", "Edge_3", "Tri_6", "Quad_8", "Tet_10", "Pyramid_13", "Wedge_15", "Hex_20", "Mixed"};
         std::array<std::string, geometryTypeLength> GeometryType {"XYZ", "XY", "X_Y_Z", "VXVYVZ", "ORIGIN_DXDYDZ", "ORIGIN_DXDY"};
         std::array<std::string, attributeTypeLength> AttributeType {"Scalar", "Vector", "Tensor", "Tensor6", "Matrix"};
         std::array<std::string, attributeCenterLength> AttributeCenter {"Node", "Edge", "Face", "Cell", "Grid"};
@@ -216,8 +220,11 @@ class SimpleXdmf {
                 case TAG::DataItem:
                     isValid = checkIsValidType<dataItemTypeLength>(DataItemType, type);
                     break;
-                case TAG::Topology:
-                    isValid = checkIsValidType<topologyTypeLength>(TopologyType, type);
+                case TAG::StructuredTopology:
+                    isValid = checkIsValidType<structuredTopologyTypeLength>(StructuredTopologyType, type);
+                    break;
+                case TAG::UnstructuredTopology:
+                    isValid = checkIsValidType<unstructuredTopologyTypeLength>(UnstructuredTopologyType, type);
                     break;
                 case TAG::Geometry:
                     isValid = checkIsValidType<geometryTypeLength>(GeometryType, type);
@@ -260,7 +267,9 @@ class SimpleXdmf {
                     return "Grid";
                 case TAG::DataItem:
                     return "DataItem";
-                case TAG::Topology:
+                case TAG::StructuredTopology:
+                    return "Topology";
+                case TAG::UnstructuredTopology:
                     return "Topology";
                 case TAG::Geometry:
                     return "Geometry";
@@ -280,6 +289,14 @@ class SimpleXdmf {
                     return "Xdmf";
                 default:
                     return "";
+            }
+        }
+
+        std::string convertTagString(const std::string& tag) {
+            if (tag == "StructuredTopology" || tag == "UnstructuredTopology") {
+                return "Topology";
+            } else {
+                return tag;
             }
         }
 
@@ -380,22 +397,22 @@ class SimpleXdmf {
             endElement("Grid");
         }
 
-        void beginTopology(const std::string& type = "2DCoRectMesh") {
-            beginElement("Topology");
+        void beginUnstructuredTopology(const std::string& type) {
+            beginElement("UnstructuredTopology");
             addType(type);
         }
 
-        void endTopology() {
-            endElement("Topology");
+        void endUnstructuredTopology() {
+            endElement("UnstructuredTopology");
         }
 
         void beginStructuredTopology(const std::string& type = "2DCoRectMesh") {
-            beginElement("Topology");
+            beginElement("StructuredTopology");
             addType(type);
         }
 
         void endStructuredTopology() {
-            endOneLineElement("Topology");
+            endOneLineElement("StructuredTopology");
         }
 
         void beginGeometory(const std::string& type = "XYZ"){

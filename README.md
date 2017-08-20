@@ -122,8 +122,8 @@ Use it to describe values in DataItem tag.
 Supported begin/end functions are
 - beginDomain(const std::string& DomainType) / endDomain();
 - beginGrid(const std::string& GridType) / endGrid();
-- beginTopology(const std::string& TopologyType) / endTopology();
 - beginStructuredTopology(const std::string& TopologyType) / endStructuredTopology();
+- beginUnstructuredTopology(const std::string& TopologyType) / endUnstructuredTopology();
 - beginGeometry(const std::string& GeometryType) / endGeometry();
 - beginDataItem(const std::string& DataItemType) / endDataItem();
 - beginAttribute(const std::string& AttributeType) / endAttribute();

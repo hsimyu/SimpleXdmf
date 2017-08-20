@@ -6,7 +6,6 @@ int main() {
     const int nx = 5;
     const int ny = 3;
 
-    gen.setNewLineCodeLF();
     gen.beginDomain();
         gen.beginGrid();
         gen.setName("Grid1");
