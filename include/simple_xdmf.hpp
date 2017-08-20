@@ -497,6 +497,60 @@ class SimpleXdmf {
         }
 
         template<typename T>
+        void addArray(const T* values_ptr, const int N) {
+            beginInnerElement();
+
+            std::stringstream ss;
+            for(size_t i = 1; i <= N; ++i) {
+                ss << values_ptr[i - 1];
+
+                if (i < N) {
+                    ss << " ";
+
+                    if (i % innerElementPerLine == 0) {
+                        buffer += ss.str() + newLine;
+                        insertIndent();
+                        ss.str("");
+                        ss.clear(std::stringstream::goodbit);
+                    }
+                }
+            }
+
+            if (ss.str() != "") {
+                buffer += ss.str() + newLine;
+            }
+
+            endInnerElement();
+        }
+
+        template<typename T, int N>
+        void addArray(const std::array<T, N>& values) {
+            beginInnerElement();
+
+            std::stringstream ss;
+            for(size_t i = 1; i <= N; ++i) {
+                ss << values[i - 1];
+
+                if (i < N) {
+                    ss << " ";
+
+                    if (i % innerElementPerLine == 0) {
+                        buffer += ss.str() + newLine;
+                        insertIndent();
+                        ss.str("");
+                        ss.clear(std::stringstream::goodbit);
+                    }
+                }
+            }
+
+            if (ss.str() != "") {
+                buffer += ss.str() + newLine;
+            }
+
+            endInnerElement();
+        }
+
+        template<typename T>
         void addVector(const std::vector<T>& values) {
             beginInnerElement();
 

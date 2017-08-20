@@ -12,3 +12,6 @@ add_executable(example_using_2d_helper ${EXAMPLE_USING_2D_HELPER})
 
 set(EXAMPLE_USING_3D_HELPER "using_3d_helper.cpp")
 add_executable(example_using_3d_helper ${EXAMPLE_USING_3D_HELPER})
+
+set(EXAMPLE_ARRAY_AND_VECTOR "array_vector_and_boost_multiarray.cpp")
+add_executable(example_array_and_vector_and_boost_multiarray ${EXAMPLE_ARRAY_AND_VECTOR})
