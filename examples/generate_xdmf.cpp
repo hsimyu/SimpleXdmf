@@ -3,24 +3,17 @@
 int main() {
     SimpleXdmf gen;
 
-    // Some settings
-    gen.setNewLineCodeLF();
-
     const int nx = 5;
     const int ny = 3;
 
-    gen.beginDomain();
-    gen.setName("Domain1");
-        gen.beginGrid();
-        gen.setName("Grid1");
-            gen.beginStructuredTopology("2DCoRectMesh");
+    gen.beginDomain("Domain1");
+        gen.beginGrid("Grid1");
+            gen.beginStructuredTopology("Topo1", "2DCoRectMesh");
             gen.setNumberOfElements(ny, nx);
-            gen.setName("Topo1");
             gen.endStructuredTopology();
 
-            gen.beginGeometory("ORIGIN_DXDY");
+            gen.beginGeometory("Geom1", "ORIGIN_DXDY");
             gen.setDimensions(ny, nx);
-            gen.setName("Geom1");
                 // Origin
                 gen.beginDataItem();
                     gen.setDimensions(2);
@@ -35,9 +28,8 @@ int main() {
                 gen.endDataItem();
             gen.endGeometory();
 
-            gen.beginAttribute();
+            gen.beginAttribute("Attr1");
             gen.setCenter("Node");
-            gen.setName("Attr1");
                 gen.beginDataItem();
                     gen.setDimensions(ny, nx);
                     gen.setFormat("XML");

@@ -362,11 +362,16 @@ class SimpleXdmf {
             newLine = CRLF;
         }
 
+        // IO functions
         void generate(const std::string file_name) {
             if(!endEdit) endXdmf();
 
             std::ofstream ofs(file_name, std::ios::out);
             ofs << content;
+        }
+
+        std::string getRawString() const {
+            return content;
         }
 
         void beginXdmf() {
@@ -380,88 +385,98 @@ class SimpleXdmf {
             endEdit = true;
         }
 
-        void beginDomain() {
+        void beginDomain(const std::string& name = "") {
             beginElement("Domain");
+            setName(name);
         };
 
         void endDomain() {
             endElement("Domain");
         };
 
-        void beginGrid(const std::string& type = "Uniform") {
+        void beginGrid(const std::string& name = "", const std::string& type = "Uniform") {
             beginElement("Grid");
             addType(type);
+            setName(name);
         }
 
         void endGrid() {
             endElement("Grid");
         }
 
-        void beginUnstructuredTopology(const std::string& type) {
+        void beginUnstructuredTopology(const std::string& name = "", const std::string& type = "Polyvertex") {
             beginElement("UnstructuredTopology");
             addType(type);
+            setName(name);
         }
 
         void endUnstructuredTopology() {
             endElement("UnstructuredTopology");
         }
 
-        void beginStructuredTopology(const std::string& type = "2DCoRectMesh") {
+        void beginStructuredTopology(const std::string& name = "", const std::string& type = "2DCoRectMesh") {
             beginElement("StructuredTopology");
             addType(type);
+            setName(name);
         }
 
         void endStructuredTopology() {
             endOneLineElement("StructuredTopology");
         }
 
-        void beginGeometory(const std::string& type = "XYZ"){
+        void beginGeometory(const std::string& name = "", const std::string& type = "XYZ"){
             beginElement("Geometry");
             addType(type);
+            setName(name);
         }
 
         void endGeometory(){
             endElement("Geometry");
         }
 
-        void beginAttribute(const std::string& type = "Scalar"){
+        void beginAttribute(const std::string& name = "", const std::string& type = "Scalar"){
             beginElement("Attribute");
             addType(type);
+            setName(name);
         }
 
         void endAttribute(){
             endElement("Attribute");
         }
 
-        void beginDataItem(const std::string& type = "Uniform") {
+        void beginDataItem(const std::string& name = "", const std::string& type = "Uniform") {
             beginElement("DataItem");
             addType(type);
+            setName(name);
         }
 
         void endDataItem() {
             endElement("DataItem");
         }
 
-        void beginSet(const std::string& type = "Node") {
+        void beginSet(const std::string& name = "", const std::string& type = "Node") {
             beginElement("Set");
             addType(type);
+            setName(name);
         }
 
         void endSet() {
             endElement("Set");
         }
 
-        void beginTime(const std::string& type = "Single") {
+        void beginTime(const std::string& name = "", const std::string& type = "Single") {
             beginElement("Time");
             addType(type);
+            setName(name);
         }
 
         void endTime() {
             endElement("Time");
         }
 
-        void beginInformation() {
+        void beginInformation(const std::string& name = "") {
             beginElement("Information");
+            setName(name);
         }
 
         void endInformation() {
@@ -517,8 +532,10 @@ class SimpleXdmf {
 
         // --- Attirbute Setting Functions ---
         void setName(const std::string& name) {
-            addNewXpath(name, currentXpath);
-            buffer += " Name=\"" + name + "\"";
+            if (name != "") {
+                addNewXpath(name, currentXpath);
+                buffer += " Name=\"" + name + "\"";
+            }
         }
 
         void setVersion(const std::string& _version) {
@@ -626,6 +643,58 @@ class SimpleXdmf {
             auto xpath = getXpath(name);
             addItem(xpath);
         }
+
+        // namespace Helper {
+        //     void begin2DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int nx, const int ny) {
+        //         beginGrid();
+        //         setName(gridName);
+
+        //         beginStructuredTopology(topologyType);
+        //         setNumberOfElements(ny, nx);
+        //         endStructuredTopology();
+        
+        //         gen.beginAttribute();
+        //         gen.setCenter("Node");
+        //         gen.setName("Attr1");
+        //             gen.beginDataItem();
+        //                 gen.setDimensions(ny, nx);
+        //                 gen.setFormat("XML");
+    
+        //                 // Adding from std::vector
+        //                 std::vector<float> node_values;
+    
+        //                 for(int i = 0; i < (nx * ny); ++i) {
+        //                     node_values.emplace_back(i);
+        //                 }
+    
+        //                 gen.addVector(node_values);
+        //             gen.endDataItem();
+        //         gen.endAttribute();
+        //     }
+            
+        //     void end2DStructuredGrid() {
+        //         endGrid();
+        //     }
+
+        //     void insert2DGeometry(const std::string& geomName, const std::string& geomType) {
+        //         beginGeometory(geomType);
+        //         setName(geomName);
+        //         setDimensions(ny, nx);
+        //             // Origin
+        //             gen.beginDataItem();
+        //                 gen.setDimensions(2);
+        //                 gen.setFormat("XML");
+        //                 gen.addItem(0.0, 0.0);
+        //             gen.endDataItem();
+    
+        //             gen.beginDataItem();
+        //                 gen.setDimensions(2);
+        //                 gen.setFormat("XML");
+        //                 gen.addItem(0.5, 0.5);
+        //             gen.endDataItem();
+        //         gen.endGeometory();
+        //     }
+        // }
 };
 
 #endif

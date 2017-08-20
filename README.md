@@ -30,22 +30,18 @@ int main() {
     const int nx = 5;
     const int ny = 3;
 
-    gen.beginDomain();
-    gen.setName("Domain1");
-        gen.beginGrid();
-        gen.setName("Grid1");
-            gen.beginStructuredTopology("2DCoRectMesh");
+    gen.beginDomain("Domain1");
+        gen.beginGrid("Grid1");
+            gen.beginStructuredTopology("Topo1", "2DCoRectMesh");
             gen.setNumberOfElements(ny, nx);
-            gen.setName("Topo1");
             gen.endStructuredTopology();
 
-            gen.beginGeometory("ORIGIN_DXDY");
+            gen.beginGeometory("Geom1", "ORIGIN_DXDY");
             gen.setDimensions(ny, nx);
-            gen.setName("Geom1");
                 // Origin
                 gen.beginDataItem();
                     gen.setDimensions(2);
-                    gen.setFormat("XML");
+                    gen.setFormat("XML")
                     gen.addItem(0.0, 0.0);
                 gen.endDataItem();
 
@@ -56,9 +52,8 @@ int main() {
                 gen.endDataItem();
             gen.endGeometory();
 
-            gen.beginAttribute();
+            gen.beginAttribute("Attr1");
             gen.setCenter("Node");
-            gen.setName("Attr1");
                 gen.beginDataItem();
                     gen.setDimensions(ny, nx);
                     gen.setFormat("XML");
@@ -120,16 +115,18 @@ Use it to describe values in DataItem tag.
 
 ## Supported Functions
 Supported begin/end functions are
-- beginDomain(const std::string& DomainType) / endDomain();
-- beginGrid(const std::string& GridType) / endGrid();
-- beginStructuredTopology(const std::string& TopologyType) / endStructuredTopology();
-- beginUnstructuredTopology(const std::string& TopologyType) / endUnstructuredTopology();
-- beginGeometry(const std::string& GeometryType) / endGeometry();
-- beginDataItem(const std::string& DataItemType) / endDataItem();
-- beginAttribute(const std::string& AttributeType) / endAttribute();
-- beginSet(const std::string& SetType) / endSet();
-- beginTime(const std::string& TimeType) / endTime();
-- beginInformation(const std::string& InformationType) / endInformation();
+- beginDomain(const std::string& name = "") / endDomain();
+- beginGrid(const std::string& name = "", const std::string& GridType = "Uniform") / endGrid();
+- beginStructuredTopology(const std::string& name = "", const std::string& TopologyType = "2DCoRectMesh") / endStructuredTopology();
+- beginUnstructuredTopology(const std::string& name = "", const std::string& TopologyType = "Polyvertex") / endUnstructuredTopology();
+- beginGeometry(const std::string& name = "", const std::string& GeometryType = "XYZ") / endGeometry();
+- beginDataItem(const std::string& name = "", const std::string& DataItemType = "Uniform") / endDataItem();
+- beginAttribute(const std::string& name = "", const std::string& AttributeType = "Scalar") / endAttribute();
+- beginSet(const std::string& name = "", const std::string& SetType = "Node") / endSet();
+- beginTime(const std::string& name = "", const std::string& TimeType = "Single") / endTime();
+- beginInformation(const std::string& name = "") / endInformation();
+
+All method can be passed its Name attribute as the 1st argument, and its type as the 2nd argument when non-default type is required.
 
 Supported set functions are
 - setName(const std::string& Name)
