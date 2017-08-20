@@ -653,7 +653,7 @@ class SimpleXdmf {
         void begin2DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int ny, const int nx) {
             beginGrid(gridName);
 
-            beginStructuredTopology(topologyType);
+            beginStructuredTopology("", topologyType);
             setNumberOfElements(ny, nx);
             endStructuredTopology();
         }
@@ -678,6 +678,39 @@ class SimpleXdmf {
             setDimensions(2);
             setFormat("XML");
             addItem(dx, dy);
+            endDataItem();
+
+            endGeometory();
+        }
+
+        void begin3DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int nz, const int ny, const int nx) {
+            beginGrid(gridName);
+
+            beginStructuredTopology("", topologyType);
+            setNumberOfElements(nz, ny, nx);
+            endStructuredTopology();
+        }
+        
+        void end3DStructuredGrid() {
+            endGrid();
+        }
+
+        template<typename T>
+        void add3DGeometryOrigin(const std::string& geomName, const T origin_z, const T origin_y, const T origin_x, const T dz, const T dy, const T dx) {
+            beginGeometory(geomName, "ORIGIN_DXDYDZ");
+
+            // Origin
+            beginDataItem();
+            setDimensions(3);
+            setFormat("XML");
+            addItem(origin_x, origin_y, origin_z);
+            endDataItem();
+
+            // Strands
+            beginDataItem();
+            setDimensions(3);
+            setFormat("XML");
+            addItem(dx, dy, dz);
             endDataItem();
 
             endGeometory();
