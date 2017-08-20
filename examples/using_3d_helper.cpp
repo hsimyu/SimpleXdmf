@@ -24,12 +24,12 @@ int main() {
 
     gen.beginDomain();
         // This method automatically insert Grid and StructuredTopology
-        gen.begin3DStructuredGrid("Grid1", "3DCoRectMesh", nz, ny, nx);
+        gen.begin3DStructuredGrid("Grid1", "3DCoRectMesh", nx, ny, nz);
 
-            gen.add3DGeometryOrigin("Geom1", origin_z, origin_y, origin_x, dz, dy, dx);
+            gen.add3DGeometryOrigin("Geom1", origin_x, origin_y, origin_z, dx, dy, dz);
             gen.beginAttribute("Node Scalar1", "Scalar");
                 gen.beginDataItem();
-                    gen.setDimensions(nz, ny, nx);
+                    gen.setDimensions(nx, ny, nz);
                     gen.addVector(values);
                 gen.endDataItem();
             gen.endAttribute();

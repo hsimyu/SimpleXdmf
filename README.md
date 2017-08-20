@@ -33,11 +33,11 @@ int main() {
     gen.beginDomain("Domain1");
         gen.beginGrid("Grid1");
             gen.beginStructuredTopology("Topo1", "2DCoRectMesh");
-            gen.setNumberOfElements(ny, nx);
+            gen.setNumberOfElements(nx, ny);
             gen.endStructuredTopology();
 
             gen.beginGeometory("Geom1", "ORIGIN_DXDY");
-            gen.setDimensions(ny, nx);
+            gen.setDimensions(nx, ny);
                 // Origin
                 gen.beginDataItem();
                     gen.setDimensions(2);
@@ -55,7 +55,7 @@ int main() {
             gen.beginAttribute("Attr1");
             gen.setCenter("Node");
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     gen.setFormat("XML");
 
                     // Adding from std::vector
@@ -140,12 +140,17 @@ Supported set functions are
 - setValue(const std::string& Value)
 - setReference(const std::string& Reference)
 - setReferenceFromName(const std::string& Name) (see below)
-- setDimensions(Args&&... args)
+- setDimensions(Args&&... args): pass nx, ny, nz, ... with arbitrary dimension length
 - setNumberOfElements(Args&&... args)
 
 Supported add functions are
 - addItem(Args&&... args)
 - addVector(const std::vector<T>& values)
+- addArray(const std::array<T, N>& values)
+- addArray(const T* values_ptr, const int size)
+- add2DArray(T** values_ptr, const int nx, const int ny)
+- add3DArray(T*** values_ptr, const int nx, const int ny, const int nz)
+- addMultiArray(boost::multi_array<T, N> values, const bool is_fortran_storage_order())
 - addReferenceFromName(cosnt std::string& Name) (see below)
 
 Some configure functions are defined.
@@ -154,9 +159,17 @@ Some configure functions are defined.
 - setNewLineCodeCRLF()
 - setIndentSpaceSize(const int size = 4); if size = 0, use '\t'.
 
-I/O function is now only one.
+I/O functions are
 - void generate(const std::string& filename)
 - std::string getRawString()
+
+Helper functions are
+- begin2DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int nx, const int ny) / end2DStructuredGrid()
+- add2DGeometryOrigin(const std::string& geometryName, const T origin_x, const T origin_y, const T dx, const T dy)
+- begin3DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int nx, const int ny, const int nz) / end3DStructuredGrid()
+- add3DGeometryOrigin(const std::string& geometryName, const T origin_x, const T origin_y, const T origin_z, const T dx, const T dy, const T dz)
+
+See using_2d_helper.cpp and using_3d_helper.cpp for using helper functions.
 
 ## Reference management
 SimpleXdmf also have a simple reference management.
@@ -167,9 +180,6 @@ setReferenceFromName() and addReferenceFromName() functions automatically set th
 
 int main() {
     SimpleXdmf gen;
-
-    const int nx = 5;
-    const int ny = 3;
 
     gen.beginDomain();
         gen.beginGrid();

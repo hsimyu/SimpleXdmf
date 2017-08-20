@@ -9,11 +9,11 @@ int main() {
     gen.beginDomain("Domain1");
         gen.beginGrid("Grid1");
             gen.beginStructuredTopology("Topo1", "2DCoRectMesh");
-            gen.setNumberOfElements(ny, nx);
+            gen.setNumberOfElements(nx, ny);
             gen.endStructuredTopology();
 
             gen.beginGeometory("Geom1", "ORIGIN_DXDY");
-            gen.setDimensions(ny, nx);
+            gen.setDimensions(nx, ny);
                 // Origin
                 gen.beginDataItem();
                     gen.setDimensions(2);
@@ -31,7 +31,7 @@ int main() {
             gen.beginAttribute("Attr1");
             gen.setCenter("Node");
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     gen.setFormat("XML");
 
                     // Adding from std::vector

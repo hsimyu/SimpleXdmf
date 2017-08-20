@@ -3,9 +3,6 @@
 int main() {
     SimpleXdmf gen;
 
-    const int nx = 5;
-    const int ny = 3;
-
     gen.beginDomain();
         gen.beginGrid("Grid1");
         gen.endGrid();

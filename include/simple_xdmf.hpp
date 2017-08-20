@@ -314,24 +314,26 @@ class SimpleXdmf {
         }
 
         // for convinience
-        void convertFromVariadicArgsToStringInternal(const std::stringstream& ss) {}
+        void convertFromVariadicArgsToStringInternal(const std::string& buffer) {}
 
         template<typename First, typename... Rests>
-        void convertFromVariadicArgsToStringInternal(std::stringstream& ss, First&& first, Rests&&... rests) {
+        void convertFromVariadicArgsToStringInternal(std::string& buffer, First&& first, Rests&&... rests) {
+            std::stringstream ss;
             ss << first;
+            buffer = ss.str() + buffer;
 
             constexpr std::size_t parameter_pack_size = sizeof...(Rests);
             if (parameter_pack_size > 0) {
-                ss << " ";
-                convertFromVariadicArgsToStringInternal(ss, std::forward<Rests>(rests)...);
+                buffer = " " + buffer;
+                convertFromVariadicArgsToStringInternal(buffer, std::forward<Rests>(rests)...);
             }
         }
 
         template<typename... Args>
         std::string convertFromVariadicArgsToString(Args&&... args) {
-            std::stringstream ss;
-            convertFromVariadicArgsToStringInternal(ss, std::forward<Args>(args)...);
-            return ss.str();
+            std::string buffer = "";
+            convertFromVariadicArgsToStringInternal(buffer, std::forward<Args>(args)...);
+            return buffer;
         }
 
         void addItemInternal(std::stringstream& ss) {}
@@ -802,11 +804,11 @@ class SimpleXdmf {
         }
 
         // helper functoins
-        void begin2DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int ny, const int nx) {
+        void begin2DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int nx, const int ny) {
             beginGrid(gridName);
 
             beginStructuredTopology("", topologyType);
-            setNumberOfElements(ny, nx);
+            setNumberOfElements(nx, ny);
             endStructuredTopology();
         }
         
@@ -815,7 +817,7 @@ class SimpleXdmf {
         }
 
         template<typename T>
-        void add2DGeometryOrigin(const std::string& geomName, const T origin_y, const T origin_x, const T dy, const T dx) {
+        void add2DGeometryOrigin(const std::string& geomName, const T origin_x, const T origin_y, const T dx, const T dy) {
             beginGeometory(geomName, "ORIGIN_DXDY");
 
             // Origin
@@ -835,11 +837,11 @@ class SimpleXdmf {
             endGeometory();
         }
 
-        void begin3DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int nz, const int ny, const int nx) {
+        void begin3DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int nx, const int ny, const int nz) {
             beginGrid(gridName);
 
             beginStructuredTopology("", topologyType);
-            setNumberOfElements(nz, ny, nx);
+            setNumberOfElements(nx, ny, nz);
             endStructuredTopology();
         }
         
@@ -848,7 +850,7 @@ class SimpleXdmf {
         }
 
         template<typename T>
-        void add3DGeometryOrigin(const std::string& geomName, const T origin_z, const T origin_y, const T origin_x, const T dz, const T dy, const T dx) {
+        void add3DGeometryOrigin(const std::string& geomName, const T origin_x, const T origin_y, const T origin_z, const T dx, const T dy, const T dz) {
             beginGeometory(geomName, "ORIGIN_DXDYDZ");
 
             // Origin

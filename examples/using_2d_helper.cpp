@@ -13,12 +13,12 @@ int main() {
     const int ny = 3;
 
     gen.beginDomain();
-        gen.begin2DStructuredGrid("Grid1", "2DCoRectMesh", ny, nx);
-            gen.add2DGeometryOrigin("Geom1", origin_y, origin_x, dy, dx);
+        gen.begin2DStructuredGrid("Grid1", "2DCoRectMesh", nx, ny);
+            gen.add2DGeometryOrigin("Geom1", origin_x, origin_y, dx, dy);
 
             gen.beginAttribute("Node Scalar1", "Scalar");
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     gen.addItem(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
                 gen.endDataItem();
             gen.endAttribute();

@@ -11,7 +11,7 @@ int main() {
         gen.beginGrid();
         gen.setName("Grid1");
             gen.beginUnstructuredTopology("Polyvertex");
-            gen.setNumberOfElements(ny, nx);
+            gen.setNumberOfElements(nx, ny);
             gen.setName("Topo1");
             gen.endUnstructuredTopology();
         gen.endGrid();

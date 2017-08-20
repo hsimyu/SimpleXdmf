@@ -17,9 +17,9 @@ int main() {
     const int N = nx * ny;
 
     gen.beginDomain();
-        gen.begin2DStructuredGrid("Grid1", "2DCoRectMesh", ny, nx);
+        gen.begin2DStructuredGrid("Grid1", "2DCoRectMesh", nx, ny);
 
-            gen.add2DGeometryOrigin("Geom1", origin_y, origin_x, dy, dx);
+            gen.add2DGeometryOrigin("Geom1", origin_x, origin_y, dx, dy);
             // ----------------------------------------------------------
             std::vector<float> vector_values;
             vector_values.resize(nx * ny);
@@ -29,7 +29,7 @@ int main() {
             }
             gen.beginAttribute("by std::vector", "Scalar");
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     // 1D vector values will be assigned with column-major order in XDMF.
                     gen.addVector(vector_values);
                 gen.endDataItem();
@@ -42,7 +42,7 @@ int main() {
 
             gen.beginAttribute("by std::array", "Scalar");
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     gen.addArray(array_values);
                 gen.endDataItem();
             gen.endAttribute();
@@ -54,7 +54,7 @@ int main() {
 
             gen.beginAttribute("by standard 1D array", "Scalar");
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     gen.addArray(standard_1d_array_values, N);
                 gen.endDataItem();
             gen.endAttribute();
@@ -72,7 +72,7 @@ int main() {
             }
             gen.beginAttribute("by standard 2D array", "Scalar");
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     gen.add2DArray(standard_2d_array_values, nx, ny);
                 gen.endDataItem();
             gen.endAttribute();
@@ -91,14 +91,14 @@ int main() {
 
             gen.beginAttribute("by boost multi array", "Scalar");
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     gen.addMultiArray(bml_array);
                 gen.endDataItem();
 
-                /* If multi_array based on fortran_storage_order(), pass True as the 2nd argument */
+                /* If multi_array is initialized with boost::fortran_storage_order(), pass true as the 2nd argument */
                 bool is_fortran_storage_order = true;
                 gen.beginDataItem();
-                    gen.setDimensions(ny, nx);
+                    gen.setDimensions(nx, ny);
                     gen.addMultiArray(bml_array, is_fortran_storage_order);
                 gen.endDataItem();
             gen.endAttribute();
