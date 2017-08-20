@@ -313,7 +313,7 @@ class SimpleXdmf {
 
     public:
         SimpleXdmf() {
-            setNewLineCodeCRLF();
+            setNewLineCodeLF();
             setIndentSpaceSize();
             beginXdmf();
         }
