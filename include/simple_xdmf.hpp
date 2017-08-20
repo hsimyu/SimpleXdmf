@@ -311,13 +311,13 @@ class SimpleXdmf {
         void convertFromVariadicArgsToStringInternal(const std::stringstream& ss) {}
 
         template<typename First, typename... Rests>
-        void convertFromVariadicArgsToStringInternal(std::stringstream& ss, First&& first, Rests&&... rest) {
+        void convertFromVariadicArgsToStringInternal(std::stringstream& ss, First&& first, Rests&&... rests) {
             ss << first;
 
             constexpr std::size_t parameter_pack_size = sizeof...(Rests);
             if (parameter_pack_size > 0) {
                 ss << " ";
-                convertFromVariadicArgsToStringInternal(ss, std::forward<Rests>(rest)...);
+                convertFromVariadicArgsToStringInternal(ss, std::forward<Rests>(rests)...);
             }
         }
 
@@ -326,6 +326,19 @@ class SimpleXdmf {
             std::stringstream ss;
             convertFromVariadicArgsToStringInternal(ss, std::forward<Args>(args)...);
             return ss.str();
+        }
+
+        void addItemInternal(std::stringstream& ss) {}
+
+        template <typename First, typename... Rests>
+        void addItemInternal(std::stringstream &ss, First &&first, Rests &&... rests) {
+            ss << first;
+
+            constexpr std::size_t parameter_pack_size = sizeof...(Rests);
+            if (parameter_pack_size > 0) {
+                ss << " ";
+                addItemInternal(ss, std::forward<Rests>(rests)...);
+            }
         }
 
     public:
@@ -511,14 +524,6 @@ class SimpleXdmf {
             endInnerElement();
         }
 
-        void addItemInternal(std::stringstream& ss) {}
-
-        template<typename First, typename... Rests>
-        void addItemInternal(std::stringstream& ss, First&& first, Rests&&... rests) {
-            ss << first << " ";
-            addItemInternal(ss, rests...);
-        }
-
         template<typename... Args>
         void addItem(Args&&... args) {
             beginInnerElement();
@@ -644,57 +649,39 @@ class SimpleXdmf {
             addItem(xpath);
         }
 
-        // namespace Helper {
-        //     void begin2DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int nx, const int ny) {
-        //         beginGrid();
-        //         setName(gridName);
+        // helper functoins
+        void begin2DStructuredGrid(const std::string& gridName, const std::string& topologyType, const int ny, const int nx) {
+            beginGrid(gridName);
 
-        //         beginStructuredTopology(topologyType);
-        //         setNumberOfElements(ny, nx);
-        //         endStructuredTopology();
+            beginStructuredTopology(topologyType);
+            setNumberOfElements(ny, nx);
+            endStructuredTopology();
+        }
         
-        //         gen.beginAttribute();
-        //         gen.setCenter("Node");
-        //         gen.setName("Attr1");
-        //             gen.beginDataItem();
-        //                 gen.setDimensions(ny, nx);
-        //                 gen.setFormat("XML");
-    
-        //                 // Adding from std::vector
-        //                 std::vector<float> node_values;
-    
-        //                 for(int i = 0; i < (nx * ny); ++i) {
-        //                     node_values.emplace_back(i);
-        //                 }
-    
-        //                 gen.addVector(node_values);
-        //             gen.endDataItem();
-        //         gen.endAttribute();
-        //     }
-            
-        //     void end2DStructuredGrid() {
-        //         endGrid();
-        //     }
+        void end2DStructuredGrid() {
+            endGrid();
+        }
 
-        //     void insert2DGeometry(const std::string& geomName, const std::string& geomType) {
-        //         beginGeometory(geomType);
-        //         setName(geomName);
-        //         setDimensions(ny, nx);
-        //             // Origin
-        //             gen.beginDataItem();
-        //                 gen.setDimensions(2);
-        //                 gen.setFormat("XML");
-        //                 gen.addItem(0.0, 0.0);
-        //             gen.endDataItem();
-    
-        //             gen.beginDataItem();
-        //                 gen.setDimensions(2);
-        //                 gen.setFormat("XML");
-        //                 gen.addItem(0.5, 0.5);
-        //             gen.endDataItem();
-        //         gen.endGeometory();
-        //     }
-        // }
+        template<typename T>
+        void add2DGeometryOrigin(const std::string& geomName, const T origin_y, const T origin_x, const T dy, const T dx) {
+            beginGeometory(geomName, "ORIGIN_DXDY");
+
+            // Origin
+            beginDataItem();
+            setDimensions(2);
+            setFormat("XML");
+            addItem(origin_x, origin_y);
+            endDataItem();
+
+            // Strands
+            beginDataItem();
+            setDimensions(2);
+            setFormat("XML");
+            addItem(dx, dy);
+            endDataItem();
+
+            endGeometory();
+        }
 };
 
 #endif

@@ -6,3 +6,6 @@ add_executable(example_reference_management ${EXAMPLE_REFERENCE_MANAGEMENT_SRC})
 
 set(EXAMPLE_UNSTRUCTURED_SRC "unstructured_topology.cpp")
 add_executable(example_unstructured_topology ${EXAMPLE_UNSTRUCTURED_SRC})
+
+set(EXAMPLE_USING_2D_HELPER "using_2d_helper.cpp")
+add_executable(example_using_2d_helper ${EXAMPLE_USING_2D_HELPER})
