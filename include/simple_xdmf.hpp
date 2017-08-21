@@ -311,7 +311,11 @@ class SimpleXdmf {
             if (type == "") return;
 
             if (checkType(type)) {
-                buffer += " " + getCurrentTagString() + "Type=\"" + type + "\"";
+                auto typeString = getCurrentTagString();
+                // irregular naming of data type attribute ....
+                if (typeString == "DataItem") typeString = "Item";
+
+                buffer += " " + typeString + "Type=\"" + type + "\"";
             }
         }
 
