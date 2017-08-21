@@ -308,6 +308,8 @@ class SimpleXdmf {
 
         // Adding Valid Attributes
         void addType(const std::string& type) {
+            if (type == "") return;
+
             if (checkType(type)) {
                 buffer += " " + getCurrentTagString() + "Type=\"" + type + "\"";
             }
