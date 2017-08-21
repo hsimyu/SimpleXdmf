@@ -191,18 +191,18 @@ class SimpleXdmf {
         static constexpr int numberTypeLength = 5;
         static constexpr int precisionTypeLength = 4;
 
-        std::array<std::string, dataItemTypeLength> DataItemType {"Uniform", "Collection", "Tree", "HyperSlab", "Coordinates", "Function"};
-        std::array<std::string, gridTypeLength> GridType {"Uniform", "Collection", "Tree", "Subset"};
-        std::array<std::string, structuredTopologyTypeLength> StructuredTopologyType {"2DSMesh", "2DRectMesh", "2DCoRectMesh", "3DSMesh", "3DRectMesh", "3DCoRectMesh"};
-        std::array<std::string, unstructuredTopologyTypeLength> UnstructuredTopologyType {"Polyvertex", "Polyline", "Polygon", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Wedge", "Hexahedron", "Edge_3", "Tri_6", "Quad_8", "Tet_10", "Pyramid_13", "Wedge_15", "Hex_20", "Mixed"};
-        std::array<std::string, geometryTypeLength> GeometryType {"XYZ", "XY", "X_Y_Z", "VXVYVZ", "ORIGIN_DXDYDZ", "ORIGIN_DXDY"};
-        std::array<std::string, attributeTypeLength> AttributeType {"Scalar", "Vector", "Tensor", "Tensor6", "Matrix"};
-        std::array<std::string, attributeCenterLength> AttributeCenter {"Node", "Edge", "Face", "Cell", "Grid"};
-        std::array<std::string, setTypeLength> SetType {"Node", "Edge", "Face", "Cell"};
-        std::array<std::string, timeTypeLength> TimeType {"Single", "HyperSlab", "List", "Range"};
-        std::array<std::string, formatTypeLength> FormatType {"XML", "HDF", "Binary"};
-        std::array<std::string, numberTypeLength> NumberType {"Float", "Int", "UInt", "Char", "UChar"};
-        std::array<std::string, precisionTypeLength> PrecisionType {"1", "2", "4", "8"};
+        std::array<std::string, dataItemTypeLength> DataItemType {{"Uniform", "Collection", "Tree", "HyperSlab", "Coordinates", "Function"}};
+        std::array<std::string, gridTypeLength> GridType {{"Uniform", "Collection", "Tree", "Subset"}};
+        std::array<std::string, structuredTopologyTypeLength> StructuredTopologyType {{"2DSMesh", "2DRectMesh", "2DCoRectMesh", "3DSMesh", "3DRectMesh", "3DCoRectMesh"}};
+        std::array<std::string, unstructuredTopologyTypeLength> UnstructuredTopologyType {{"Polyvertex", "Polyline", "Polygon", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Wedge", "Hexahedron", "Edge_3", "Tri_6", "Quad_8", "Tet_10", "Pyramid_13", "Wedge_15", "Hex_20", "Mixed"}};
+        std::array<std::string, geometryTypeLength> GeometryType {{"XYZ", "XY", "X_Y_Z", "VXVYVZ", "ORIGIN_DXDYDZ", "ORIGIN_DXDY"}};
+        std::array<std::string, attributeTypeLength> AttributeType {{"Scalar", "Vector", "Tensor", "Tensor6", "Matrix"}};
+        std::array<std::string, attributeCenterLength> AttributeCenter {{"Node", "Edge", "Face", "Cell", "Grid"}};
+        std::array<std::string, setTypeLength> SetType {{"Node", "Edge", "Face", "Cell"}};
+        std::array<std::string, timeTypeLength> TimeType {{"Single", "HyperSlab", "List", "Range"}};
+        std::array<std::string, formatTypeLength> FormatType {{"XML", "HDF", "Binary"}};
+        std::array<std::string, numberTypeLength> NumberType {{"Float", "Int", "UInt", "Char", "UChar"}};
+        std::array<std::string, precisionTypeLength> PrecisionType {{"1", "2", "4", "8"}};
 
         template<int N>
         bool checkIsValidType(const std::array<std::string, N>& valid_types, const std::string& specified_type) {
@@ -566,7 +566,7 @@ class SimpleXdmf {
             endInnerElement();
         }
 
-        template<typename T, int N>
+        template<typename T, size_t N>
         void addArray(const std::array<T, N>& values) {
             beginInnerElement();
 
@@ -623,7 +623,7 @@ class SimpleXdmf {
 
 #ifdef USE_BOOST
         // based on c_index_order (row-major)
-        template<typename T, int N>
+        template<typename T, size_t N>
         void addMultiArray(const boost::multi_array<T, N>& values, const bool isFortranStorageOrder = false) {
             const int size = values.num_elements();
 
@@ -631,7 +631,7 @@ class SimpleXdmf {
                 addArray(values.data(), size);
             } else {
                 using array_type = boost::multi_array<T, N>;
-                boost::array<array_type::index, N> index;
+                boost::array<typename array_type::index, N> index;
 
                 // initialize index
                 for(int i = 0; i < N; ++i) {
