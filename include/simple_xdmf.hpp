@@ -830,14 +830,14 @@ class SimpleXdmf {
             beginDataItem();
             setDimensions(2);
             setFormat("XML");
-            addItem(origin_x, origin_y);
+            addItem(origin_y, origin_x);
             endDataItem();
 
             // Strands
             beginDataItem();
             setDimensions(2);
             setFormat("XML");
-            addItem(dx, dy);
+            addItem(dy, dx);
             endDataItem();
 
             endGeometory();
@@ -863,14 +863,14 @@ class SimpleXdmf {
             beginDataItem();
             setDimensions(3);
             setFormat("XML");
-            addItem(origin_x, origin_y, origin_z);
+            addItem(origin_z, origin_y, origin_x);
             endDataItem();
 
             // Strands
             beginDataItem();
             setDimensions(3);
             setFormat("XML");
-            addItem(dx, dy, dz);
+            addItem(dz, dy, dx);
             endDataItem();
 
             endGeometory();
