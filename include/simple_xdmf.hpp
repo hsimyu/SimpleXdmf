@@ -761,7 +761,7 @@ class SimpleXdmf {
             }
 
             if (sect == "DataItem" || sect == "All") {
-                buffer += " Selection=\"" + sect + "\"";
+                buffer += " Section=\"" + sect + "\"";
             } else {
                 std::string error_message = "Invalid Section type = " + sect + " is passed to setSection().";
                 throw std::invalid_argument(error_message);
