@@ -84,9 +84,7 @@ class SimpleXdmf {
         std::map<std::string, std::string> xpathMap;
 
         void addNewXpath(const std::string& name, const std::string& xpath) {
-            if (xpathMap.count(name) > 0) {
-                std::cerr << "[ERROR] Duplicate Name attribute \"" << name << "\" may cause incorrect Xpath reference. " << std::endl;
-            } else {
+            if (xpathMap.count(name) == 0) {
                 xpathMap[name] = xpath;
             }
         }
@@ -95,7 +93,7 @@ class SimpleXdmf {
             if (xpathMap.count(name) > 0) {
                 return xpathMap[name] + "[@Name='" + name + "']";
             } else {
-                std::cerr << "[ERROR] Non-existente Name \"" << name << "\" passed to getXpath(). " << std::endl;
+                std::cerr << "[SIMPLE XDMF ERROR] Non-existente Name \"" << name << "\" passed to getXpath(). " << std::endl;
                 return "";
             }
         }
@@ -260,7 +258,7 @@ class SimpleXdmf {
             if (!isValid) {
                 std::string tagString = getCurrentTagString();
 
-                std::string error_message = "Invalid " + tagString + " type = " + type + " is passed to.";
+                std::string error_message = "[SIMPLE XDMF ERROR] Invalid " + tagString + " type = " + type + " is passed to.";
                 throw std::invalid_argument(error_message);
             }
 
@@ -705,7 +703,7 @@ class SimpleXdmf {
 
         void setVersion(const std::string& _version) {
             if (current_tag != TAG::Xdmf) {
-                std::cerr << "[ERROR] setVersion() cannot be called when current Tag is not Xdmf." << std::endl;
+                std::cerr << "[SIMPLE XDMF ERROR] setVersion() cannot be called when current Tag is not Xdmf." << std::endl;
                 return;
             }
             buffer += " Version=\"" + _version + "\"";
@@ -715,7 +713,7 @@ class SimpleXdmf {
             if (checkIsValidType<formatTypeLength>(FormatType, type)) {
                 buffer += " Format=\"" + type + "\"";
             } else {
-                std::string error_message = "Invalid Format type = " + type + " is passed to setFormat().";
+                std::string error_message = "[SIMPLE XDMF ERROR] Invalid Format type = " + type + " is passed to setFormat().";
                 throw std::invalid_argument(error_message);
             }
         }
@@ -724,7 +722,7 @@ class SimpleXdmf {
             if (checkIsValidType<precisionTypeLength>(PrecisionType, type)) {
                 buffer += " Precision=\"" + type + "\"";
             } else {
-                std::string error_message = "Invalid Precision type = " + type + " is passed to setPrecision().";
+                std::string error_message = "[SIMPLE XDMF ERROR] Invalid Precision type = " + type + " is passed to setPrecision().";
                 throw std::invalid_argument(error_message);
             }
         }
@@ -733,28 +731,28 @@ class SimpleXdmf {
             if (checkIsValidType<numberTypeLength>(NumberType, type)) {
                 buffer += " NumberType=\"" + type + "\"";
             } else {
-                std::string error_message = "Invalid Number type = " + type + " is passed to setNumberType().";
+                std::string error_message = "[SIMPLE XDMF ERROR] Invalid Number type = " + type + " is passed to setNumberType().";
                 throw std::invalid_argument(error_message);
             }
         }
 
         void setCenter(const std::string& type = "Node") {
             if (current_tag != TAG::Attribute) {
-                std::cerr << "[ERROR] setCenter() cannot be called when current Tag is not Attribute." << std::endl;
+                std::cerr << "[SIMPLE XDMF ERROR] setCenter() cannot be called when current Tag is not Attribute." << std::endl;
                 return;
             }
 
             if (checkIsValidType<attributeCenterLength>(AttributeCenter, type)) {
                 buffer += " Center=\"" + type + "\"";
             } else {
-                std::string error_message = "Invalid Center type = " + type + " is passed to setCenter().";
+                std::string error_message = "[SIMPLE XDMF ERROR] Invalid Center type = " + type + " is passed to setCenter().";
                 throw std::invalid_argument(error_message);
             }
         }
 
         void setFunction(const std::string& func) {
             if (current_tag != TAG::DataItem) {
-                std::cerr << "[ERROR] setFunction() cannot be called when current Tag is not DataItem." << std::endl;
+                std::cerr << "[SIMPLE XDMF ERROR] setFunction() cannot be called when current Tag is not DataItem." << std::endl;
                 return;
             }
             buffer += " Function=\"" + func + "\"";
@@ -762,21 +760,21 @@ class SimpleXdmf {
 
         void setSection(const std::string& sect) {
             if (current_tag != TAG::Grid) {
-                std::cerr << "[ERROR] setSection() cannot be called when current Tag is not Grid." << std::endl;
+                std::cerr << "[SIMPLE XDMF ERROR] setSection() cannot be called when current Tag is not Grid." << std::endl;
                 return;
             }
 
             if (sect == "DataItem" || sect == "All") {
                 buffer += " Section=\"" + sect + "\"";
             } else {
-                std::string error_message = "Invalid Section type = " + sect + " is passed to setSection().";
+                std::string error_message = "[SIMPLE XDMF ERROR] Invalid Section type = " + sect + " is passed to setSection().";
                 throw std::invalid_argument(error_message);
             }
         }
 
         void setValue(const std::string& value) {
             if (current_tag != TAG::Time && current_tag != TAG::Information) {
-                std::cerr << "[ERROR] setValue() cannot be called when current Tag is not Time and Information." << std::endl;
+                std::cerr << "[SIMPLE XDMF ERROR] setValue() cannot be called when current Tag is not Time and Information." << std::endl;
                 return;
             }
             buffer += " Value=\"" + value + "\"";
