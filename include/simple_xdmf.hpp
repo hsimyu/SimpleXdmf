@@ -177,7 +177,7 @@ class SimpleXdmf {
 
         // Type checking
         static constexpr int dataItemTypeLength = 6;
-        static constexpr int gridTypeLength = 5;
+        static constexpr int gridTypeLength = 4;
         static constexpr int structuredTopologyTypeLength = 6;
         static constexpr int unstructuredTopologyTypeLength = 17;
         static constexpr int geometryTypeLength = 6;
@@ -190,7 +190,7 @@ class SimpleXdmf {
         static constexpr int precisionTypeLength = 4;
 
         std::array<std::string, dataItemTypeLength> DataItemType {{"Uniform", "Collection", "Tree", "HyperSlab", "Coordinates", "Function"}};
-        std::array<std::string, gridTypeLength> GridType {{"Uniform", "Collection", "Tree", "Subset", "Temporal"}};
+        std::array<std::string, gridTypeLength> GridType {{"Uniform", "Collection", "Tree", "Subset"}};
         std::array<std::string, structuredTopologyTypeLength> StructuredTopologyType {{"2DSMesh", "2DRectMesh", "2DCoRectMesh", "3DSMesh", "3DRectMesh", "3DCoRectMesh"}};
         std::array<std::string, unstructuredTopologyTypeLength> UnstructuredTopologyType {{"Polyvertex", "Polyline", "Polygon", "Triangle", "Quadrilateral", "Tetrahedron", "Pyramid", "Wedge", "Hexahedron", "Edge_3", "Tri_6", "Quad_8", "Tet_10", "Pyramid_13", "Wedge_15", "Hex_20", "Mixed"}};
         std::array<std::string, geometryTypeLength> GeometryType {{"XYZ", "XY", "X_Y_Z", "VXVYVZ", "ORIGIN_DXDYDZ", "ORIGIN_DXDY"}};
@@ -316,20 +316,7 @@ class SimpleXdmf {
                 buffer += " " + typeString + "Type=\"" + type + "\"";
             }
         }
-    
-        // Adding Valid Attributes
-        void addType(const std::string& type, const std::string& collection) {
-            addType(type);
-            if (collection == "") return;
 
-            if (checkType(collection)) {
-                auto typeString = getCurrentTagString();
-                // irregular naming of data type attribute ....
-                if (typeString == "Grid") typeString = "Collection";
-
-                buffer += " " + typeString + "Type=\"" + collection + "\"";
-            }
-        }
 
         // for convinience
         void convertFromVariadicArgsToStringInternal(const std::string& buffer) {}
@@ -433,9 +420,9 @@ class SimpleXdmf {
             endElement("Domain");
         };
 
-        void beginGrid(const std::string& name = "", const std::string& type = "Uniform", const std::string& collection = "") {
+        void beginGrid(const std::string& name = "", const std::string& type = "Uniform") {
             beginElement("Grid");
-            addType(type,collection);
+            addType(type);
             setName(name);
         }
 
@@ -792,6 +779,21 @@ class SimpleXdmf {
                 return;
             }
             buffer += " Value=\"" + value + "\"";
+        }
+
+        void setCollectionType(const std::string& type) {
+            if (current_tag != TAG::Grid) {
+                std::cerr << "[SIMPLE XDMF ERROR] setCollectionType() cannot be called when current Tag is not Grid." << std::endl;
+                return;
+            }
+
+            if (type == "Temporal") {
+                buffer += " CollectionType=\"" + type + "\"";
+            } else {
+                std::string error_message = "[SIMPLE XDMF ERROR] Invalid Collection type = " + type + " is passed to setCollectionType().";
+                throw std::invalid_argument(error_message);
+            }
+            
         }
 
         template<typename... Args>
