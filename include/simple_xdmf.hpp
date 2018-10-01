@@ -317,6 +317,7 @@ class SimpleXdmf {
             }
         }
 
+
         // for convinience
         void convertFromVariadicArgsToStringInternal(const std::string& buffer) {}
 
@@ -778,6 +779,21 @@ class SimpleXdmf {
                 return;
             }
             buffer += " Value=\"" + value + "\"";
+        }
+
+        void setCollectionType(const std::string& type) {
+            if (current_tag != TAG::Grid) {
+                std::cerr << "[SIMPLE XDMF ERROR] setCollectionType() cannot be called when current Tag is not Grid." << std::endl;
+                return;
+            }
+
+            if (type == "Temporal") {
+                buffer += " CollectionType=\"" + type + "\"";
+            } else {
+                std::string error_message = "[SIMPLE XDMF ERROR] Invalid Collection type = " + type + " is passed to setCollectionType().";
+                throw std::invalid_argument(error_message);
+            }
+            
         }
 
         template<typename... Args>
